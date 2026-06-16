@@ -1,5 +1,5 @@
 import { collection, getDocs, doc, updateDoc, onSnapshot } from 'firebase/firestore';
-import { db } from './firebase';
+import { db } from './firebase.js';
 
 export const getBooks = async () => {
   try {

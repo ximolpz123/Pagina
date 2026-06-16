@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import BookCard from './BookCard';
-import { subscribeToBooks } from '../bookService';
+import BookCard from './BookCard.jsx';
+import { subscribeToBooks } from '../bookService.js';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -20,10 +20,13 @@ const Dashboard = () => {
   }, []);
 
   // Filtrado de libros en base a la barra de búsqueda (Título o Autor)
-  const filteredBooks = books.filter(book => 
-    book.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    book.author.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBooks = books.filter(book => {
+    // Usamos || '' por si algún libro en Firebase no tiene título o autor, evitando que la página colapse
+    const title = book.title || '';
+    const author = book.author || '';
+    return title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+           author.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   return (
     <div className="dashboard-container">
