@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, onSnapshot, addDoc } from 'firebase/firestore';
 import { db } from './firebase.js';
 
 export const getBooks = async () => {
@@ -28,6 +28,17 @@ export const subscribeToBooks = (callback) => {
   });
 };
 
+export const subscribeToBookById = (bookId, callback) => {
+  const bookRef = doc(db, 'books', bookId);
+  return onSnapshot(bookRef, (docSnap) => {
+    if (docSnap.exists()) {
+      callback({ id: docSnap.id, ...docSnap.data() });
+    } else {
+      callback(null);
+    }
+  });
+};
+
 export const reserveBookById = async (bookId) => {
   try {
     const bookRef = doc(db, 'books', bookId);
@@ -36,5 +47,15 @@ export const reserveBookById = async (bookId) => {
   } catch (error) {
     console.error("Error al reservar el libro en Firebase:", error);
     return { success: false, message: 'Hubo un error al reservar.' };
+  }
+};
+
+export const addBook = async (bookData) => {
+  try {
+    const docRef = await addDoc(collection(db, 'books'), bookData);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Error al añadir el libro a Firebase:", error);
+    return { success: false, message: 'Error al intentar guardar el libro.' };
   }
 };

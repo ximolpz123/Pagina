@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard.jsx';
 import Busqueda from './pages/Busqueda.jsx';
 import DetalleLibro from './pages/DetalleLibro.jsx';
 import MiPerfil from './pages/MiPerfil.jsx';
+import Bibliotecario from './pages/Bibliotecario.jsx';
 import Navbar from './components/Navbar.jsx';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path="/busqueda" element={<Busqueda />} />
           <Route path="/detalle/:id" element={<DetalleLibro />} />
           <Route path="/perfil" element={<MiPerfil />} />
+          <Route path="/bibliotecario" element={<Bibliotecario />} />
         </Routes>
         <Navbar />
       </div>
