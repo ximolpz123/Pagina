@@ -1,23 +1,23 @@
-export const mockBooks = [
-  {
-    id: '1',
-    title: 'Cálculo de una variable',
-    author: 'James Stewart',
-    available: true,
-    coverUrl: 'https://via.placeholder.com/300x450?text=Calculo+Stewart'
+export const dashboardStats = {
+  metrics: {
+    totalBooks: 5840,
+    available: 4120,
+    borrowed: 1650,
+    newThisMonth: 125
   },
-  {
-    id: '2',
-    title: 'Física Universitaria',
-    author: 'Sears y Zemansky',
-    available: false,
-    coverUrl: 'https://via.placeholder.com/300x450?text=Fisica'
-  },
-  {
-    id: '3',
-    title: 'Estructuras de Datos',
-    author: 'Mark Allen Weiss',
-    available: true,
-    coverUrl: 'https://via.placeholder.com/300x450?text=Estructuras'
-  }
-];
+  categoriesDistribution: [
+    { name: 'Informática', value: 2100 },
+    { name: 'Ciencias', value: 1540 },
+    { name: 'Literatura', value: 1200 },
+    { name: 'Medicina', value: 1000 }
+  ],
+  statusDistribution: [
+    { name: 'Disponibles', cantidad: 4120 },
+    { name: 'En Préstamo', cantidad: 1650 }
+  ],
+  recentBooks: [
+    { id: '101', title: 'Cálculo de una variable', author: 'James Stewart', category: 'Ciencias Básicas' },
+    { id: '102', title: 'Clean Code', author: 'Robert C. Martin', category: 'Informática' },
+    { id: '103', title: 'Anatomía Humana', author: 'Frank H. Netter', category: 'Medicina' }
+  ]
+};

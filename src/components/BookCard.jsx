@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { reserveBookById } from '../bookService.js';
 import './BookCard.css';
 
 const BookCard = ({ book }) => {
   const [isReserving, setIsReserving] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleReserve = async () => {
     setIsReserving(true);
@@ -20,11 +22,19 @@ const BookCard = ({ book }) => {
 
   return (
     <div className="book-card">
-      <div className="cover-container">
+      <div 
+        className="cover-container" 
+        onClick={() => navigate(`/detalle/${book.id}`)} 
+        style={{ cursor: 'pointer' }}
+      >
         <img src={book.coverUrl} alt={`Portada de ${book.title}`} className="book-cover" />
       </div>
       <div className="book-info">
-        <h3 className="book-title">{book.title}</h3>
+        <h3 
+          className="book-title" 
+          onClick={() => navigate(`/detalle/${book.id}`)} 
+          style={{ cursor: 'pointer' }}
+        >{book.title}</h3>
         <p className="book-author">{book.author}</p>
         
         <div className={`status-badge ${book.available ? 'available' : 'unavailable'}`}>

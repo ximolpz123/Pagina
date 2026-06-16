@@ -13,45 +13,116 @@
 
 .dashboard-main {
   padding: 1.5rem 1rem;
+  padding-bottom: 6rem;
   flex: 1;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem; /* Espacio entre filas */
 }
 
-.search-section {
-  margin-bottom: 2rem;
-}
-
-.global-search-bar {
-  width: 100%;
-  padding: 1.25rem 1rem;
-  font-size: 1.1rem;
-  border: 2px solid #cbd5e1;
-  border-radius: 12px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.global-search-bar:focus {
-  border-color: var(--primary-color);
-}
-
-.ai-autocomplete-placeholder {
-  margin-top: 0.75rem;
-  font-size: 0.85rem;
-  color: var(--primary-color);
-  text-align: right;
-  font-weight: 600;
-}
-
-.books-grid {
+/* --- Tarjetas KPI --- */
+.kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, 1fr); /* 2 columnas en celular */
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .kpi-grid { grid-template-columns: repeat(4, 1fr); } /* 4 columnas en PC */
+}
+
+.kpi-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.kpi-card h3 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.kpi-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--primary-color);
+}
+
+/* --- Gráficos --- */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* 1 columna en celular */
   gap: 1.5rem;
 }
 
-.loading-text {
+@media (min-width: 850px) {
+  .charts-grid { grid-template-columns: 1fr 1fr; } /* 2 columnas en PC */
+}
+
+.chart-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.chart-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-main);
+}
+
+.chart-wrapper {
+  height: 280px;
+  width: 100%;
+}
+
+/* --- Últimos Ingresos --- */
+.recent-books-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.recent-books-section h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.recent-books-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.recent-book-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--bg-color);
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.recent-book-info h4 { font-size: 1rem; margin-bottom: 0.25rem; }
+.recent-book-info p { font-size: 0.85rem; color: var(--text-muted); }
+
+.recent-book-category {
+  background-color: #dbeafe;
+  color: #1e40af;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
   text-align: center;
-  color: var(--text-muted);
 }
