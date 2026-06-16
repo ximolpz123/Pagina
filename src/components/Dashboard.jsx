@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BookCard from './BookCard';
-import { getBooks } from '../services/bookService';
+import { subscribeToBooks } from '../bookService';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -9,13 +9,21 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchLibraryData = async () => {
-      const data = await getBooks();
+    // Nos suscribimos a los datos en tiempo real
+    const unsubscribe = subscribeToBooks((data) => {
       setBooks(data);
       setIsLoading(false);
-    };
-    fetchLibraryData();
+    });
+    
+    // Limpiamos el "listener" cuando el componente se desmonta para no gastar memoria
+    return () => unsubscribe();
   }, []);
+
+  // Filtrado de libros en base a la barra de búsqueda (Título o Autor)
+  const filteredBooks = books.filter(book => 
+    book.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    book.author.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="dashboard-container">
@@ -41,7 +49,11 @@ const Dashboard = () => {
           {isLoading ? (
             <p className="loading-text">Cargando catálogo...</p>
           ) : (
-            books.map((book) => <BookCard key={book.id} book={book} />)
+            filteredBooks.length > 0 ? (
+              filteredBooks.map((book) => <BookCard key={book.id} book={book} />)
+            ) : (
+              <p className="loading-text">No se encontraron libros 🔎</p>
+            )
           )}
         </section>
       </main>

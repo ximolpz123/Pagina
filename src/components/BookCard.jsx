@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { reserveBookById } from '../services/bookService';
+import { reserveBookById } from '../bookService';
 import './BookCard.css';
 
 const BookCard = ({ book }) => {
