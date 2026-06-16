@@ -1,17 +1,21 @@
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100vh;
-  background-color: #F8FAF8;
+:root {
+  --primary-color: #2563eb;
+  --success-color: #16a34a;
+  --danger-color: #dc2626;
+  --bg-color: #f8fafc;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
 }
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
 }
