@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { subscribeToBookById, reserveBookById } from '../bookService.js';
+import { subscribeToBookById, reserveBookById, updateBookStock } from '../bookService.js';
 import './DetalleLibro.css';
 
 const DetalleLibro = () => {
@@ -10,10 +10,18 @@ const DetalleLibro = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isReserving, setIsReserving] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  
+  // Estados para modificar el stock
+  const [newStock, setNewStock] = useState('');
+  const [isUpdatingStock, setIsUpdatingStock] = useState(false);
 
   useEffect(() => {
     const unsubscribe = subscribeToBookById(id, (data) => {
       setBook(data);
+      if (data) {
+        const current = data.stock !== undefined ? data.stock : (data.available ? 1 : 0);
+        setNewStock(current);
+      }
       setIsLoading(false);
     });
     return () => unsubscribe();
@@ -30,8 +38,18 @@ const DetalleLibro = () => {
     }
   };
 
+  const handleUpdateStock = async () => {
+    setIsUpdatingStock(true);
+    await updateBookStock(book.id, Number(newStock));
+    setIsUpdatingStock(false);
+    alert('✅ Stock actualizado correctamente en la base de datos.');
+  };
+
   if (isLoading) return <div className="loading-state">Cargando detalles del libro...</div>;
   if (!book) return <div className="error-state">No pudimos encontrar este libro 😕</div>;
+
+  const stockActual = book.stock !== undefined ? book.stock : (book.available ? 1 : 0);
+  const isAvailable = stockActual > 0;
 
   return (
     <div className="detalle-container">
@@ -46,8 +64,8 @@ const DetalleLibro = () => {
           <h2 className="detalle-title">{book.title}</h2>
           <p className="detalle-author">{book.author}</p>
           
-          <div className={`status-badge ${book.available ? 'available' : 'unavailable'}`}>
-            {book.available ? 'Disponible' : 'Ocupado'}
+          <div className={`status-badge ${isAvailable ? 'available' : 'unavailable'}`}>
+            {isAvailable ? `Disponible (${stockActual} en inventario)` : 'Agotado'}
           </div>
 
           <div className="detalle-synopsis">
@@ -58,10 +76,26 @@ const DetalleLibro = () => {
           <button 
             className="reserve-btn-large" 
             onClick={handleReserve}
-            disabled={!book.available || isReserving}
+            disabled={!isAvailable || isReserving}
           >
             {isReserving ? 'Procesando...' : 'Reservar Libro en 1 Clic'}
           </button>
+
+          {/* Controles de Administrador */}
+          <div className="admin-section">
+            <h4>⚙️ Administrar Inventario</h4>
+            <div className="stock-control">
+              <input 
+                type="number" 
+                min="0" 
+                value={newStock} 
+                onChange={(e) => setNewStock(e.target.value)} 
+              />
+              <button onClick={handleUpdateStock} disabled={isUpdatingStock}>
+                {isUpdatingStock ? 'Guardando...' : 'Actualizar Stock'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

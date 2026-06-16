@@ -20,6 +20,10 @@ const BookCard = ({ book }) => {
     }
   };
 
+  // Calculamos el stock actual asegurando compatibilidad con los libros que subiste antes
+  const stockActual = book.stock !== undefined ? book.stock : (book.available ? 1 : 0);
+  const isAvailable = stockActual > 0;
+
   return (
     <div className="book-card">
       <div 
@@ -37,14 +41,14 @@ const BookCard = ({ book }) => {
         >{book.title}</h3>
         <p className="book-author">{book.author}</p>
         
-        <div className={`status-badge ${book.available ? 'available' : 'unavailable'}`}>
-          {book.available ? 'Disponible' : 'Ocupado'}
+        <div className={`status-badge ${isAvailable ? 'available' : 'unavailable'}`}>
+          {isAvailable ? `Disponible (${stockActual})` : 'Agotado'}
         </div>
 
         <button 
           className="reserve-btn" 
           onClick={handleReserve}
-          disabled={!book.available || isReserving}
+          disabled={!isAvailable || isReserving}
         >
           {isReserving ? 'Procesando...' : 'Reservar en 1 Clic'}
         </button>

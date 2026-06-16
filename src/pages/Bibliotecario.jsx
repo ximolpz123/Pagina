@@ -8,7 +8,8 @@ const Bibliotecario = () => {
     author: '',
     category: 'Informática',
     coverUrl: '',
-    synopsis: ''
+    synopsis: '',
+    stock: Math.floor(Math.random() * 10) + 1 // Stock aleatorio del 1 al 10 por defecto
   });
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState(null);
@@ -24,10 +25,11 @@ const Bibliotecario = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Preparamos los datos del libro (por defecto disponible: true)
+    // Preparamos los datos asegurando que el stock sea un número
     const newBook = {
       ...formData,
-      available: true
+      stock: Number(formData.stock),
+      available: Number(formData.stock) > 0
     };
 
     const response = await addBook(newBook);
@@ -35,8 +37,8 @@ const Bibliotecario = () => {
 
     if (response.success) {
       setNotification({ type: 'success', message: '¡Libro añadido exitosamente! 📚' });
-      // Limpiamos el formulario
-      setFormData({ title: '', author: '', category: 'Informática', coverUrl: '', synopsis: '' });
+      // Limpiamos el formulario y generamos un nuevo stock aleatorio
+      setFormData({ title: '', author: '', category: 'Informática', coverUrl: '', synopsis: '', stock: Math.floor(Math.random() * 10) + 1 });
       setTimeout(() => setNotification(null), 4000);
     } else {
       setNotification({ type: 'error', message: 'Error al añadir el libro.' });
@@ -78,6 +80,10 @@ const Bibliotecario = () => {
                 <option value="Medicina">Medicina</option>
                 <option value="Literatura">Literatura</option>
               </select>
+            </div>
+            <div className="input-group">
+              <label>Cantidad en Stock</label>
+              <input type="number" name="stock" value={formData.stock} onChange={handleChange} min="0" required />
             </div>
             <div className="input-group">
               <label>URL de la Portada (Imagen)</label>
