@@ -82,7 +82,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
-        <h1>Panel de Control 📊</h1>
+        <h1>Biblioteca Online</h1>
       </header>
       
       <main className="dashboard-main">

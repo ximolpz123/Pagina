@@ -21,7 +21,10 @@
 }
 
 .search-section {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .global-search-bar {
@@ -35,6 +38,75 @@
 }
 
 .global-search-bar:focus { border-color: var(--primary-color); }
+
+/* Estilos para el Autocompletado Predictivo */
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  list-style: none;
+  padding: 0.5rem 0;
+  z-index: 50; /* Lo mantiene por encima de los filtros y libros */
+  max-height: 250px;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.autocomplete-dropdown li {
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  transition: background-color 0.2s;
+}
+
+.autocomplete-dropdown li:hover { background-color: #f1f5f9; color: var(--primary-color); }
+.category-icon { font-size: 1.1rem; opacity: 0.9; }
+
+/* Estilos para el nuevo panel de Filtros */
+.filters-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 150px; /* Asegura que en móvil bajen a la siguiente línea */
+}
+
+.filter-group label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.filter-select {
+  padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; background-color: white; color: var(--text-main); cursor: pointer; transition: border-color 0.2s;
+}
+.filter-select:focus { border-color: var(--primary-color); }
 
 .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
 
