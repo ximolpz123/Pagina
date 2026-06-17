@@ -5,16 +5,29 @@
 }
 
 .perfil-header {
-  background-color: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%);
   color: white;
-  padding: 1.5rem 1rem;
+  padding: 1.8rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  box-shadow: 0 6px 20px rgba(22, 91, 43, 0.15);
+  margin-bottom: 0.5rem;
 }
 
-.settings-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; transition: transform 0.2s; }
-.settings-btn:hover { transform: rotate(90deg); }
+.perfil-header h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+  margin: 0;
+  animation: headerFadeDown 0.5s ease-out forwards;
+}
+
+.settings-btn { background: rgba(255,255,255,0.15); border: none; font-size: 1.2rem; cursor: pointer; transition: all 0.3s ease; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+.settings-btn:hover { transform: rotate(90deg); background: rgba(255,255,255,0.3); }
 
 .perfil-main {
   padding: 1.5rem 1rem;
