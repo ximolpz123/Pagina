@@ -40,13 +40,23 @@ const DetalleLibro = () => {
     const unsubscribeReservations = subscribeToActiveReservations(setReservasActivas);
 
     return () => {
-      unsubscribeBook();
-      unsubscribeReservations();
+      // Prevención de crasheo (Pantalla en blanco) validando que existan las funciones de limpieza
+      if (typeof unsubscribeBook === 'function') {
+        unsubscribeBook();
+      } else if (unsubscribeBook instanceof Promise) {
+        unsubscribeBook.then(unsub => typeof unsub === 'function' && unsub());
+      }
+
+      if (typeof unsubscribeReservations === 'function') {
+        unsubscribeReservations();
+      } else if (unsubscribeReservations instanceof Promise) {
+        unsubscribeReservations.then(unsub => typeof unsub === 'function' && unsub());
+      }
     };
   }, [id]);
 
   const handleReserveClick = () => {
-    const creditosDisponibles = 5 - reservasActivas.length;
+    const creditosDisponibles = 5 - (reservasActivas?.length || 0); // Validación por si reservasActivas viene nulo
     
     if (creditosDisponibles <= 0) {
       setShowCreditLimitModal(true);

@@ -72,7 +72,7 @@ const BookCard = ({ book, creditosDisponibles }) => {
           </span>
           {isAvailable ? (
             <button className="reserve-btn" onClick={handleReserveClick}>
-              Reservar en 1 Clic
+              Reservar
             </button>
           ) : (
             <button className="request-stock-btn" onClick={handleRequestStock}>

@@ -14,9 +14,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/busqueda" element={<Busqueda />} />
-          <Route path="/detalle/:id" element={<DetalleLibro />} />
           <Route path="/perfil" element={<MiPerfil />} />
           <Route path="/bibliotecario" element={<Bibliotecario />} />
+          <Route path="/libro/:id" element={<DetalleLibro />} />
         </Routes>
         <Navbar />
       </div>
