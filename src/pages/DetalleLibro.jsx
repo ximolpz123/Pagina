@@ -13,6 +13,7 @@ const DetalleLibro = () => {
   
   // Estados para la reserva y validación de créditos
   const [reservasActivas, setReservasActivas] = useState([]);
+  const [showCreditLimitModal, setShowCreditLimitModal] = useState(false);
   const [showReservationModal, setShowReservationModal] = useState(false);
   const [pickupDate, setPickupDate] = useState(new Date().toISOString().split('T')[0]);
   const [returnDate, setReturnDate] = useState(() => {
@@ -48,7 +49,7 @@ const DetalleLibro = () => {
     const creditosDisponibles = 5 - reservasActivas.length;
     
     if (creditosDisponibles <= 0) {
-      alert('⚠️ ¡Límite de créditos alcanzado! Has llegado al máximo de 5 préstamos activos. Debes devolver un libro para poder reservar otro.');
+      setShowCreditLimitModal(true);
       return;
     }
     setShowReservationModal(true);
@@ -133,6 +134,21 @@ const DetalleLibro = () => {
             <div className="modal-actions">
               <button className="cancel-btn" onClick={() => setShowReservationModal(false)}>Cancelar</button>
               <button className="confirm-btn" onClick={handleConfirmReservation}>Confirmar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Límite de Créditos */}
+      {showCreditLimitModal && (
+        <div className="reservation-modal-overlay">
+          <div className="reservation-modal-content warning-modal">
+            <span className="warning-icon">⚠️</span>
+            <h3>Límite de Créditos Alcanzado</h3>
+            <p>Has llegado al máximo de 5 préstamos activos. Debes devolver un libro para poder reservar otro.</p>
+            <div className="modal-actions">
+              <button className="cancel-btn" onClick={() => setShowCreditLimitModal(false)}>Entendido</button>
+              <button className="confirm-btn" onClick={() => { setShowCreditLimitModal(false); navigate('/perfil'); }}>Ir a Mi Perfil</button>
             </div>
           </div>
         </div>

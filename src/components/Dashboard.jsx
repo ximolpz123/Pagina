@@ -4,7 +4,7 @@ import { subscribeToBooks, subscribeToActiveReservations } from '../bookService.
 import './Dashboard.css';
 
 // Colores modernos para nuestros gráficos
-const PIE_COLORS = ['#308855', '#165B2B', '#C6AA77', '#A08159', '#6b705c', '#8a9a5b'];
+const PIE_COLORS = ['#308855', '#165B2B', '#C6AA77', '#A08159', '#e11d48', '#db2777', '#f97316', '#f59e0b', '#84cc16', '#22c55e'];
 
 const Dashboard = () => {
   const [books, setBooks] = useState([]);
@@ -27,7 +27,13 @@ const Dashboard = () => {
     'Informática': 120,
     'Ciencias Básicas': 90,
     'Literatura': 80,
-    'Medicina': 50
+    'Medicina': 50,
+    'Ciencia Ficcion': 45,
+    'Romance': 30,
+    'Fantasia': 40,
+    'Acción': 25,
+    'Comics': 15,
+    'Thriller': 35
   };
 
   let realAvailable = 0;

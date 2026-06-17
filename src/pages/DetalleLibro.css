@@ -160,3 +160,25 @@
 .cancel-btn { flex: 1; padding: 0.8rem; background: var(--secondary-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 .confirm-btn { flex: 1; padding: 0.8rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
 .confirm-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
+
+/* Estilos para el Modal de Advertencia */
+.reservation-modal-content.warning-modal {
+  text-align: center;
+}
+
+.warning-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.reservation-modal-content.warning-modal h3 {
+  color: var(--danger-color);
+}
+
+.reservation-modal-content.warning-modal p {
+  color: var(--text-main);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0.5rem 0 1.5rem 0;
+}

@@ -61,6 +61,12 @@ const Busqueda = () => {
     if (cat.includes('ciencias')) return '🧪';
     if (cat.includes('medicina')) return '🩺';
     if (cat.includes('literatura')) return '📖';
+    if (cat.includes('ciencia ficcion')) return '🚀';
+    if (cat.includes('romance')) return '❤️';
+    if (cat.includes('fantasia')) return '🧙';
+    if (cat.includes('acción')) return '💥';
+    if (cat.includes('comics')) return '🦸';
+    if (cat.includes('thriller')) return '🔪';
     return '📚'; // Icono por defecto para cualquier otra categoría
   };
 
@@ -135,6 +141,12 @@ const Busqueda = () => {
                 <option value="Ciencias Básicas">Ciencias Básicas</option>
                 <option value="Medicina">Medicina</option>
                 <option value="Literatura">Literatura</option>
+                <option value="Ciencia Ficcion">Ciencia Ficción</option>
+                <option value="Romance">Romance</option>
+                <option value="Fantasia">Fantasía</option>
+                <option value="Acción">Acción</option>
+                <option value="Comics">Comics</option>
+                <option value="Thriller">Thriller</option>
               </select>
             </div>
 
