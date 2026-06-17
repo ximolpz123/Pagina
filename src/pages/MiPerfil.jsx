@@ -25,12 +25,17 @@ const MiPerfil = () => {
       setReservasActivas(data);
       let multas = 0;
       const today = new Date();
+      today.setHours(0, 0, 0, 0); // Ignoramos la hora para calcular por día calendario
       data.forEach(res => {
-        const returnD = new Date(res.returnDate);
+        if (!res.returnDate) return;
+        const [year, month, day] = res.returnDate.split('-');
+        const returnD = new Date(year, month - 1, day);
+        returnD.setHours(0, 0, 0, 0);
+        
         if (today > returnD) {
-          const diffTime = Math.abs(today - returnD);
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          multas += diffDays * 2; // $2.00 de multa por día
+          const diffTime = today - returnD;
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          multas += diffDays * 5000; // $5000 CLP de multa por día de atraso
         }
       });
       setMultasActivas(multas);
@@ -68,6 +73,24 @@ const MiPerfil = () => {
     return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
   });
 
+  // Lógica visual para la fecha de devolución
+  const getDueDateMessage = (dateString) => {
+    if (!dateString) return { text: 'Fecha no registrada', color: 'var(--text-muted)' };
+    const [year, month, day] = dateString.split('-');
+    const returnD = new Date(year, month - 1, day);
+    returnD.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (today > returnD) {
+      return { text: `¡Atrasado! Fecha límite era: ${dateString}`, color: 'var(--danger-color)' };
+    } else if (today.getTime() === returnD.getTime()) {
+      return { text: `¡Debes devolverlo HOY!`, color: 'var(--danger-color)' };
+    } else {
+      return { text: `Devolver antes del: ${dateString}`, color: 'var(--text-muted)' };
+    }
+  };
+
   return (
     <div className="perfil-container">
       <header className="perfil-header">
@@ -85,7 +108,7 @@ const MiPerfil = () => {
           </div>
           <div className={`stat-card ${multasActivas > 0 ? 'danger' : 'success'}`}>
             <h3>Multas Activas</h3>
-            <p className="stat-value">${multasActivas.toFixed(2)}</p>
+            <p className="stat-value">${multasActivas.toLocaleString('es-CL')}</p>
             <p className="stat-desc">{multasActivas > 0 ? 'Tienes pagos pendientes' : 'Estás al día con la biblioteca'}</p>
           </div>
         </section>
@@ -101,7 +124,9 @@ const MiPerfil = () => {
                 <div key={libro.id} className="perfil-book-card">
                   <div className="book-info-basic">
                     <h4>{libro.bookTitle}</h4>
-                    <span className="due-date">Devolver antes del: {libro.returnDate}</span>
+                    <span className="due-date" style={{ color: getDueDateMessage(libro.returnDate).color }}>
+                      {getDueDateMessage(libro.returnDate).text}
+                    </span>
                   </div>
                   <button className="return-btn" onClick={() => handleDevolver(libro)}>Devolver</button>
                 </div>

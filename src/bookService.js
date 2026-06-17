@@ -118,7 +118,11 @@ export const reserveBookById = async (bookId) => {
 
 export const addBook = async (bookData) => {
   try {
-    const docRef = await addDoc(collection(db, 'books'), bookData);
+    const newBookWithDate = {
+      ...bookData,
+      createdAt: new Date().toISOString()
+    };
+    const docRef = await addDoc(collection(db, 'books'), newBookWithDate);
     return { success: true, id: docRef.id };
   } catch (error) {
     console.error("Error al añadir el libro a Firebase:", error);

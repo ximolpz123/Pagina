@@ -1,14 +1,83 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { dashboardStats } from '../mockData.js';
+import { subscribeToBooks, subscribeToActiveReservations } from '../bookService.js';
 import './Dashboard.css';
 
 // Colores modernos para nuestros gráficos
-const PIE_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#8b5cf6'];
+const PIE_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#8b5cf6', '#e11d48', '#0ea5e9'];
 
 const Dashboard = () => {
-  // Extraemos la data del mockData
-  const { metrics, categoriesDistribution, statusDistribution, recentBooks } = dashboardStats;
+  const [books, setBooks] = useState([]);
+  const [activeReservations, setActiveReservations] = useState([]);
+
+  useEffect(() => {
+    // Suscripciones en tiempo real a Firebase
+    const unsubBooks = subscribeToBooks(setBooks);
+    const unsubRes = subscribeToActiveReservations(setActiveReservations);
+    return () => { unsubBooks(); unsubRes(); };
+  }, []);
+
+  // --- LÓGICA DE AGREGACIÓN (BASE + TIEMPO REAL) ---
+  // Valores base solicitados para simular una biblioteca grande
+  const BASE_AVAILABLE = 201;
+  const BASE_BORROWED = 139;
+  const BASE_NEW = 50;
+  
+  const baseCategories = {
+    'Informática': 120,
+    'Ciencias Básicas': 90,
+    'Literatura': 80,
+    'Medicina': 50
+  };
+
+  let realAvailable = 0;
+  let realNewThisMonth = 0;
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const categoryCounts = { ...baseCategories };
+
+  // Contabilizar libros y stock actual
+  books.forEach(book => {
+    const stock = book.stock !== undefined ? book.stock : (book.available ? 1 : 0);
+    realAvailable += stock;
+
+    if (book.createdAt) {
+      const d = new Date(book.createdAt);
+      if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) realNewThisMonth++;
+    } else {
+      realNewThisMonth++; // Por defecto contamos los libros que subiste anteriormente
+    }
+
+    let cat = book.category || 'Informática';
+    if (cat === 'Informática y Programación') cat = 'Informática';
+    if (categoryCounts[cat] !== undefined) categoryCounts[cat] += stock;
+    else categoryCounts[cat] = stock;
+  });
+
+  // Contabilizar libros en préstamo actualmente
+  const realBorrowed = activeReservations.length;
+  activeReservations.forEach(res => {
+    const book = books.find(b => b.id === res.bookId);
+    if (book) {
+      let cat = book.category || 'Informática';
+      if (cat === 'Informática y Programación') cat = 'Informática';
+      if (categoryCounts[cat] !== undefined) categoryCounts[cat] += 1;
+      else categoryCounts[cat] = 1;
+    }
+  });
+
+  // Cálculo Final Combinado
+  const finalAvailable = BASE_AVAILABLE + realAvailable;
+  const finalBorrowed = BASE_BORROWED + realBorrowed;
+  const finalTotal = finalAvailable + finalBorrowed; // (Ej: 201 + 139 = 340 + los reales)
+  const finalNew = BASE_NEW + realNewThisMonth;
+
+  const categoriesDistribution = Object.keys(categoryCounts).map(key => ({ name: key, value: categoryCounts[key] })).filter(cat => cat.value > 0);
+  const statusDistribution = [ { name: 'Disponibles', cantidad: finalAvailable }, { name: 'En Préstamo', cantidad: finalBorrowed } ];
+  
+  // Extraer los 3 libros más recientes
+  const sortedBooks = [...books].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  const recentBooks = sortedBooks.slice(0, 3);
 
   return (
     <div className="dashboard-container">
@@ -21,19 +90,19 @@ const Dashboard = () => {
         <section className="kpi-grid">
           <div className="kpi-card">
             <h3>Total Libros</h3>
-            <p className="kpi-value">{metrics.totalBooks}</p>
+            <p className="kpi-value">{finalTotal}</p>
           </div>
           <div className="kpi-card">
             <h3>Disponibles</h3>
-            <p className="kpi-value" style={{color: '#16a34a'}}>{metrics.available}</p>
+            <p className="kpi-value" style={{color: '#16a34a'}}>{finalAvailable}</p>
           </div>
           <div className="kpi-card">
             <h3>En Préstamo</h3>
-            <p className="kpi-value" style={{color: '#ea580c'}}>{metrics.borrowed}</p>
+            <p className="kpi-value" style={{color: '#ea580c'}}>{finalBorrowed}</p>
           </div>
           <div className="kpi-card">
             <h3>Nuevos este mes</h3>
-            <p className="kpi-value" style={{color: '#8b5cf6'}}>{metrics.newThisMonth}</p>
+            <p className="kpi-value" style={{color: '#8b5cf6'}}>{finalNew}</p>
           </div>
         </section>
 
@@ -73,15 +142,17 @@ const Dashboard = () => {
         <section className="recent-books-section">
           <h3>Últimos Ingresos a la Biblioteca</h3>
           <div className="recent-books-list">
-            {recentBooks.map(book => (
+            {recentBooks.length > 0 ? recentBooks.map(book => (
               <div key={book.id} className="recent-book-card">
                 <div className="recent-book-info">
                   <h4>{book.title}</h4>
                   <p>{book.author}</p>
                 </div>
-                <span className="recent-book-category">{book.category}</span>
+                <span className="recent-book-category">{book.category || 'General'}</span>
               </div>
-            ))}
+            )) : (
+              <p style={{color: 'var(--text-muted)'}}>Cargando últimos ingresos...</p>
+            )}
           </div>
         </section>
       </main>
