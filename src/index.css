@@ -1,10 +1,14 @@
 :root {
-  --primary-color: #2563eb;
-  --success-color: #16a34a;
+  /* Paleta Naturaleza / Tierra */
+  --bg-color: #EAE2CA; /* Crema: Fondo Principal */
+  --secondary-color: #C6AA77; /* Arena: Acento Secundario */
+  --tertiary-color: #A08159; /* Tierra: Acento Terciario / Bordes / Inactivos */
+  --primary-color: #308855; /* Verde Hoja: Botones, Disponible */
+  --primary-hover: #165B2B; /* Verde Bosque: Hover de botones */
+  --text-main: #165B2B; /* Verde Bosque: Textos importantes, Títulos */
+  --text-muted: #A08159; /* Tierra para textos secundarios e iconos inactivos */
+  --success-color: #308855; /* Reutilizamos Verde Hoja para éxito general */
   --danger-color: #dc2626;
-  --bg-color: #f8fafc;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
 }
 
 * {

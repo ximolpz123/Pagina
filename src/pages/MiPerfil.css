@@ -90,7 +90,7 @@
   background-color: white; color: var(--primary-color); border: 2px solid var(--primary-color);
   padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
-.return-btn:hover { background-color: var(--primary-color); color: white; }
+.return-btn:hover { background-color: var(--primary-hover); color: white; border-color: var(--primary-hover); }
 
 .history-card { opacity: 0.8; }
 
@@ -105,8 +105,8 @@
   letter-spacing: 0.5px;
   text-align: center;
 }
-.history-status-badge.returned { background-color: #f1f5f9; color: #64748b; }
-.history-status-badge.active { background-color: #dbeafe; color: var(--primary-color); }
+.history-status-badge.returned { background-color: var(--secondary-color); color: white; }
+.history-status-badge.active { background-color: var(--primary-color); color: white; }
 
 /* Modal de Configuración */
 .config-modal-overlay {
@@ -130,5 +130,6 @@
 
 .save-config-btn {
   width: 100%; margin-top: 1.5rem; padding: 0.8rem; background-color: var(--primary-color);
-  color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
+  color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background-color 0.2s;
 }
+.save-config-btn:hover { background-color: var(--primary-hover); }

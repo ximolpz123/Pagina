@@ -46,7 +46,7 @@
   transition: background-color 0.2s;
 }
 
-.submit-btn:hover:not(:disabled) { background-color: #1d4ed8; }
+.submit-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
 .submit-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
 
 .notification {

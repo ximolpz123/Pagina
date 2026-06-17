@@ -73,7 +73,7 @@
   transition: background-color 0.2s;
 }
 
-.autocomplete-dropdown li:hover { background-color: #f1f5f9; color: var(--primary-color); }
+.autocomplete-dropdown li:hover { background-color: var(--secondary-color); color: white; }
 .category-icon { font-size: 1.1rem; opacity: 0.9; }
 
 /* Estilos para el nuevo panel de Filtros */
@@ -85,7 +85,7 @@
   padding: 1rem 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--tertiary-color);
 }
 
 .filter-group {

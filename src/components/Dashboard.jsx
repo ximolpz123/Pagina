@@ -4,7 +4,7 @@ import { subscribeToBooks, subscribeToActiveReservations } from '../bookService.
 import './Dashboard.css';
 
 // Colores modernos para nuestros gráficos
-const PIE_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#8b5cf6', '#e11d48', '#0ea5e9'];
+const PIE_COLORS = ['#308855', '#165B2B', '#C6AA77', '#A08159', '#6b705c', '#8a9a5b'];
 
 const Dashboard = () => {
   const [books, setBooks] = useState([]);
@@ -131,7 +131,7 @@ const Dashboard = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip cursor={{fill: 'transparent'}} />
-                  <Bar dataKey="cantidad" fill="#2563eb" radius={[6, 6, 0, 0]} barSize={50} />
+                  <Bar dataKey="cantidad" fill="#308855" radius={[6, 6, 0, 0]} barSize={50} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
