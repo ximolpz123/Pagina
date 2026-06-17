@@ -3,93 +3,100 @@ import { useNavigate } from 'react-router-dom';
 import { addReservation } from '../bookService.js';
 import './BookCard.css';
 
-const BookCard = ({ book }) => {
-  const [isReserving, setIsReserving] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [showResModal, setShowResModal] = useState(false);
-  const [pickupDate, setPickupDate] = useState(new Date().toISOString().split('T')[0]);
-  const [returnDate, setReturnDate] = useState('');
+const BookCard = ({ book, creditosDisponibles }) => {
   const navigate = useNavigate();
+  const [showReservationModal, setShowReservationModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [pickupDate, setPickupDate] = useState(new Date().toISOString().split('T')[0]);
+  const [returnDate, setReturnDate] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 7); // Por defecto 7 días de préstamo
+    return date.toISOString().split('T')[0];
+  });
 
-  const confirmReservation = async () => {
-    if (!pickupDate || !returnDate) {
-      alert('Por favor selecciona las fechas.');
+  const stock = book.stock !== undefined ? book.stock : (book.available ? 1 : 0);
+  const isAvailable = stock > 0;
+
+  const handleReserveClick = () => {
+    // 1. Verificamos si el libro tiene stock
+    if (!isAvailable) {
+      alert('Este libro está agotado y no se puede reservar.');
       return;
     }
-    setIsReserving(true);
+
+    // 2. ¡NUEVA VALIDACIÓN! Verificamos los créditos de préstamo.
+    if (creditosDisponibles <= 0) {
+      alert('⚠️ ¡Límite de créditos alcanzado! Has llegado al máximo de 5 préstamos activos. Debes devolver un libro para poder reservar otro.');
+      return;
+    }
+
+    // 3. Si todo está bien, mostramos el modal de confirmación.
+    setShowReservationModal(true);
+  };
+
+  const handleConfirmReservation = async () => {
     const response = await addReservation(book, pickupDate, returnDate);
-    setIsReserving(false);
-    setShowResModal(false);
-    
     if (response.success) {
-      setShowModal(true);
-      setTimeout(() => setShowModal(false), 3000);
+      setShowReservationModal(false);
+      setShowSuccessModal(true);
+      setTimeout(() => setShowSuccessModal(false), 3000);
+    } else {
+      alert('Hubo un error al procesar la reserva.');
     }
   };
 
-  // Calculamos el stock actual asegurando compatibilidad con los libros que subiste antes
-  const stockActual = book.stock !== undefined ? book.stock : (book.available ? 1 : 0);
-  const isAvailable = stockActual > 0;
+  // Navegar al detalle del libro al hacer clic en la portada
+  const handleCoverClick = () => {
+    navigate(`/libro/${book.id}`);
+  };
 
   return (
-    <div className="book-card">
-      <div 
-        className="cover-container" 
-        onClick={() => navigate(`/detalle/${book.id}`)} 
-        style={{ cursor: 'pointer' }}
-      >
-        <img src={book.coverUrl} alt={`Portada de ${book.title}`} className="book-cover" />
-      </div>
-      <div className="book-info">
-        <h3 
-          className="book-title" 
-          onClick={() => navigate(`/detalle/${book.id}`)} 
-          style={{ cursor: 'pointer' }}
-        >{book.title}</h3>
-        <p className="book-author">{book.author}</p>
-        
-        <div className={`status-badge ${isAvailable ? 'available' : 'unavailable'}`}>
-          {isAvailable ? `Disponible (${stockActual})` : 'Agotado'}
+    <>
+      <div className="book-card">
+        <div className="cover-container" onClick={handleCoverClick} style={{ cursor: 'pointer' }}>
+          <img src={book.coverUrl || 'https://via.placeholder.com/200x300.png?text=Sin+Portada'} alt={`Portada de ${book.title}`} className="book-cover" />
         </div>
-
-        <button 
-          className="reserve-btn" 
-          onClick={() => setShowResModal(true)}
-          disabled={!isAvailable || isReserving}
-        >
-          Reservar
-        </button>
+        <div className="book-info">
+          <h3 className="book-title">{book.title}</h3>
+          <p className="book-author">{book.author}</p>
+          <span className={`status-badge ${isAvailable ? 'available' : 'unavailable'}`}>
+            {isAvailable ? `Disponible (${stock})` : 'Agotado'}
+          </span>
+          <button className="reserve-btn" onClick={handleReserveClick} disabled={!isAvailable}>
+            Reservar en 1 Clic
+          </button>
+        </div>
       </div>
-      
-      {showModal && (
+
+      {/* Modal de Éxito */}
+      {showSuccessModal && (
         <div className="success-modal">
-          <div className="modal-content">
-            <span>✅ Confirmación Exitosa</span>
-            <p>Se ha reservado "{book.title}".</p>
-          </div>
+          <span>¡Reserva Exitosa! ✅</span>
+          <p>Has reservado "{book.title}".</p>
         </div>
       )}
 
-      {showResModal && (
+      {/* Modal de Confirmación de Reserva */}
+      {showReservationModal && (
         <div className="reservation-modal-overlay">
           <div className="reservation-modal-content">
-            <h3>📅 Programar Reserva</h3>
+            <h3>Confirmar Reserva</h3>
             <div className="date-group">
-              <label>Fecha de Retiro:</label>
-              <input type="date" value={pickupDate} onChange={(e) => setPickupDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
+              <label>Fecha de Retiro</label>
+              <input type="date" value={pickupDate} onChange={(e) => setPickupDate(e.target.value)} />
             </div>
             <div className="date-group">
-              <label>Fecha de Devolución:</label>
-              <input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} min={pickupDate} />
+              <label>Fecha de Devolución</label>
+              <input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} />
             </div>
             <div className="modal-actions">
-              <button className="cancel-btn" onClick={() => setShowResModal(false)}>Cancelar</button>
-              <button className="confirm-btn" onClick={confirmReservation} disabled={isReserving}>{isReserving ? '...' : 'Confirmar'}</button>
+              <button className="cancel-btn" onClick={() => setShowReservationModal(false)}>Cancelar</button>
+              <button className="confirm-btn" onClick={handleConfirmReservation}>Confirmar</button>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

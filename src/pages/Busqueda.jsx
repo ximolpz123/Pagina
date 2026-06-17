@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import BookCard from '../components/BookCard.jsx';
-import { subscribeToBooks } from '../bookService.js';
+import { subscribeToBooks, subscribeToActiveReservations } from '../bookService.js';
 import './Busqueda.css';
 
 const Busqueda = () => {
   const [books, setBooks] = useState([]);
+  const [reservasActivas, setReservasActivas] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   
   // Estados para los nuevos filtros
@@ -16,11 +17,17 @@ const Busqueda = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = subscribeToBooks((data) => {
+    const unsubscribeBooks = subscribeToBooks((data) => {
       setBooks(data);
       setIsLoading(false);
     });
-    return () => unsubscribe();
+
+    const unsubscribeReservations = subscribeToActiveReservations(setReservasActivas);
+
+    return () => {
+      unsubscribeBooks();
+      unsubscribeReservations();
+    };
   }, []);
 
   // Lógica Predictiva: Generar sugerencias basadas en lo que el usuario escribe
@@ -155,7 +162,7 @@ const Busqueda = () => {
             <p className="loading-text">Buscando en el catálogo...</p>
           ) : (
             filteredBooks.length > 0 ? (
-              filteredBooks.map((book) => <BookCard key={book.id} book={book} />)
+              filteredBooks.map((book) => <BookCard key={book.id} book={book} creditosDisponibles={5 - reservasActivas.length} />)
             ) : (
               <p className="loading-text">No se encontraron libros 🔎</p>
             )
