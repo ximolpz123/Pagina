@@ -131,7 +131,11 @@ const Dashboard = () => {
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip cursor={{fill: 'transparent'}} />
-                  <Bar dataKey="cantidad" fill="#308855" radius={[6, 6, 0, 0]} barSize={50} />
+                  <Bar dataKey="cantidad" radius={[6, 6, 0, 0]} barSize={50}>
+                    {statusDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index === 0 ? '#16a34a' : '#ea580c'} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
