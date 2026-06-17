@@ -72,6 +72,21 @@
 .reserve-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
 .reserve-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
 
+.request-stock-btn {
+  margin-top: auto;
+  background-color: var(--tertiary-color);
+  color: white;
+  border: none;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.request-stock-btn:hover { background-color: var(--secondary-color); }
+
 .success-modal {
   position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
   background-color: var(--success-color); color: white;
@@ -81,6 +96,10 @@
 
 .modal-content span { font-weight: bold; display: block; margin-bottom: 0.25rem; }
 @keyframes slideUp { from { bottom: -50px; opacity: 0; } to { bottom: 20px; opacity: 1; } }
+
+.success-modal.request-modal {
+  background-color: var(--tertiary-color);
+}
 
 /* Reservation Modal */
 .reservation-modal-overlay {

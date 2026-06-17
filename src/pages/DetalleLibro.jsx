@@ -66,6 +66,10 @@ const DetalleLibro = () => {
     }
   };
 
+  const handleRequestStock = () => {
+    alert(`🔔 Se ha notificado a la biblioteca para solicitar más stock de "${book.title}". ¡Gracias por avisar!`);
+  };
+
   const handleStockUpdate = async () => {
     const stockNum = parseInt(newStock, 10);
     if (!isNaN(stockNum) && stockNum >= 0) {
@@ -101,9 +105,16 @@ const DetalleLibro = () => {
               <h3>Sinopsis</h3>
               <p>{book.synopsis || 'No hay sinopsis disponible para este libro.'}</p>
             </div>
-            <button className="reserve-btn-large" onClick={handleReserveClick} disabled={!isAvailable}>
-              Reservar Libro
-            </button>
+            
+            {isAvailable ? (
+              <button className="reserve-btn-large" onClick={handleReserveClick}>
+                Reservar Libro
+              </button>
+            ) : (
+              <button className="request-stock-btn-large" onClick={handleRequestStock}>
+                🔔 Solicitar Stock a Biblioteca
+              </button>
+            )}
 
             {/* Sección de Admin para editar stock */}
             <div className="admin-section">

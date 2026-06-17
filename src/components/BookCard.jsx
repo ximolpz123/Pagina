@@ -8,6 +8,7 @@ const BookCard = ({ book, creditosDisponibles }) => {
   const [showReservationModal, setShowReservationModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showCreditLimitModal, setShowCreditLimitModal] = useState(false);
+  const [showRequestModal, setShowRequestModal] = useState(false);
   const [pickupDate, setPickupDate] = useState(new Date().toISOString().split('T')[0]);
   const [returnDate, setReturnDate] = useState(() => {
     const date = new Date();
@@ -51,6 +52,12 @@ const BookCard = ({ book, creditosDisponibles }) => {
     navigate(`/libro/${book.id}`);
   };
 
+  // Solicitar stock a la biblioteca
+  const handleRequestStock = () => {
+    setShowRequestModal(true);
+    setTimeout(() => setShowRequestModal(false), 3000);
+  };
+
   return (
     <>
       <div className="book-card">
@@ -63,9 +70,15 @@ const BookCard = ({ book, creditosDisponibles }) => {
           <span className={`status-badge ${isAvailable ? 'available' : 'unavailable'}`}>
             {isAvailable ? `Disponible (${stock})` : 'Agotado'}
           </span>
-          <button className="reserve-btn" onClick={handleReserveClick} disabled={!isAvailable}>
-            Reservar en 1 Clic
-          </button>
+          {isAvailable ? (
+            <button className="reserve-btn" onClick={handleReserveClick}>
+              Reservar en 1 Clic
+            </button>
+          ) : (
+            <button className="request-stock-btn" onClick={handleRequestStock}>
+              🔔 Solicitar Stock
+            </button>
+          )}
         </div>
       </div>
 
@@ -74,6 +87,14 @@ const BookCard = ({ book, creditosDisponibles }) => {
         <div className="success-modal">
           <span>¡Reserva Exitosa! ✅</span>
           <p>Has reservado "{book.title}".</p>
+        </div>
+      )}
+
+      {/* Modal de Solicitud de Stock */}
+      {showRequestModal && (
+        <div className="success-modal request-modal">
+          <span>¡Solicitud Enviada! 📨</span>
+          <p>Se ha notificado a la biblioteca para reponer "{book.title}".</p>
         </div>
       )}
 

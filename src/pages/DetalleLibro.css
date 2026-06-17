@@ -104,6 +104,20 @@
 .reserve-btn-large:disabled { background-color: #94a3b8; cursor: not-allowed; }
 .loading-state, .error-state { text-align: center; padding: 4rem 1rem; font-size: 1.2rem; color: var(--text-muted); }
 
+.request-stock-btn-large {
+  background-color: var(--tertiary-color);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+}
+.request-stock-btn-large:hover { background-color: var(--secondary-color); }
+
 /* Estilos para el Control de Stock */
 .admin-section {
   margin-top: 2rem;
