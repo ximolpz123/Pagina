@@ -1,69 +1,47 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth, db } from '../firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import React, { useContext, useState, useEffect, createContext } from 'react';
+import { auth } from '../firebase';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged 
+} from 'firebase/auth';
 
 const AuthContext = createContext();
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  return useContext(AuthContext);
+}
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null);
-  const [userName, setUserName] = useState('');
-  const [permissions, setPermissions] = useState(null);
+export function AuthProvider({ children }) {
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let unsubscribeDoc = null;
-    
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        
-        // Usamos onSnapshot para detectar cambios de nombre/rol en tiempo real
-        unsubscribeDoc = onSnapshot(doc(db, 'users', currentUser.uid), (userDoc) => {
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            setRole(data.role);
-            setUserName(data.name || currentUser.email);
-            setPermissions(data.permissions || null);
-          } else {
-            if (currentUser.email.toLowerCase() === 'admin@gmail.com') {
-              setRole('admin');
-              setUserName(currentUser.email);
-              setPermissions(null);
-            } else {
-              // Si no existe el documento y no es el admin base, significa que fue eliminado
-              signOut(auth);
-            }
-          }
-          setLoading(false);
-        }, (error) => {
-          console.error("Error al obtener datos del usuario:", error);
-          setRole('analista');
-          setUserName(currentUser.email);
-          setLoading(false);
-        });
-      } else {
-        setUser(null);
-        setRole(null);
-        setUserName('');
-        setPermissions(null);
-        setLoading(false);
-        if (unsubscribeDoc) unsubscribeDoc();
-      }
-    });
+  function signup(email, password) {
+    return createUserWithEmailAndPassword(auth, email, password);
+  }
 
-    return () => {
-      unsubscribeAuth();
-      if (unsubscribeDoc) unsubscribeDoc();
-    };
+  function login(email, password) {
+    return signInWithEmailAndPassword(auth, email, password);
+  }
+
+  function logout() {
+    return signOut(auth);
+  }
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+    return unsubscribe;
   }, []);
 
+  const value = { currentUser, signup, login, logout };
+
   return (
-    <AuthContext.Provider value={{ user, role, userName, permissions, loading }}>
+    <AuthContext.Provider value={value}>
       {!loading && children}
     </AuthContext.Provider>
   );
-};
+}

@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addReservation } from '../bookService.js';
 import './BookCard.css';
+import { useAuth } from '../context/AuthContext';
 
 const BookCard = ({ book, creditosDisponibles }) => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [showReservationModal, setShowReservationModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showCreditLimitModal, setShowCreditLimitModal] = useState(false);
@@ -37,7 +39,7 @@ const BookCard = ({ book, creditosDisponibles }) => {
   };
 
   const handleConfirmReservation = async () => {
-    const response = await addReservation(book, pickupDate, returnDate);
+    const response = await addReservation(book, pickupDate, returnDate, currentUser?.email);
     if (response.success) {
       setShowReservationModal(false);
       setShowSuccessModal(true);

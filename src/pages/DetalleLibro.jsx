@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { subscribeToBookById, addReservation, updateBookStock, subscribeToActiveReservations } from '../bookService.js';
+import { subscribeToBookById, addReservation, updateBookStock, subscribeToUserActiveReservations } from '../bookService.js';
 import './DetalleLibro.css';
+import { useAuth } from '../context/AuthContext';
 
 const DetalleLibro = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   const [book, setBook] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +39,7 @@ const DetalleLibro = () => {
     });
 
     // Nos suscribimos a las reservas activas para contar los créditos
-    const unsubscribeReservations = subscribeToActiveReservations(setReservasActivas);
+    const unsubscribeReservations = subscribeToUserActiveReservations(currentUser?.email, setReservasActivas);
 
     return () => {
       // Prevención de crasheo (Pantalla en blanco) validando que existan las funciones de limpieza
@@ -66,7 +68,7 @@ const DetalleLibro = () => {
   };
 
   const handleConfirmReservation = async () => {
-    const response = await addReservation(book, pickupDate, returnDate);
+    const response = await addReservation(book, pickupDate, returnDate, currentUser?.email);
     if (response.success) {
       setShowReservationModal(false);
       alert(`✅ ¡Has reservado "${book.title}" con éxito!`);

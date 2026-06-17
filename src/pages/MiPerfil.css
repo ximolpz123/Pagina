@@ -146,3 +146,16 @@
   color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background-color 0.2s;
 }
 .save-config-btn:hover { background-color: var(--primary-hover); }
+
+.logout-btn {
+  background-color: var(--danger-color);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover { background-color: #b91c1c; }

@@ -16,11 +16,12 @@ export const getBooks = async () => {
   }
 };
 
-export const addReservation = async (book, pickupDate, returnDate) => {
+export const addReservation = async (book, pickupDate, returnDate, userEmail) => {
   try {
     await addDoc(collection(db, 'reservations'), {
       bookId: book.id,
       bookTitle: book.title,
+      userEmail: userEmail || 'desconocido',
       pickupDate,
       returnDate,
       status: 'active',
@@ -45,6 +46,18 @@ export const addReservation = async (book, pickupDate, returnDate) => {
 
 export const subscribeToActiveReservations = (callback) => {
   const q = query(collection(db, 'reservations'), where('status', '==', 'active'));
+  return onSnapshot(q, (snapshot) => callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+};
+
+export const subscribeToUserActiveReservations = (userEmail, callback) => {
+  if (!userEmail) return () => {};
+  const q = query(collection(db, 'reservations'), where('status', '==', 'active'), where('userEmail', '==', userEmail));
+  return onSnapshot(q, (snapshot) => callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+};
+
+export const subscribeToUserHistoryReservations = (userEmail, callback) => {
+  if (!userEmail) return () => {};
+  const q = query(collection(db, 'reservations'), where('status', '==', 'returned'), where('userEmail', '==', userEmail));
   return onSnapshot(q, (snapshot) => callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
 };
 

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import BookCard from '../components/BookCard.jsx';
-import { subscribeToBooks, subscribeToActiveReservations } from '../bookService.js';
+import { subscribeToBooks, subscribeToUserActiveReservations } from '../bookService.js';
 import './Busqueda.css';
+import { useAuth } from '../context/AuthContext';
 
 const Busqueda = () => {
   const [books, setBooks] = useState([]);
+  const { currentUser } = useAuth();
   const [reservasActivas, setReservasActivas] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -22,7 +24,7 @@ const Busqueda = () => {
       setIsLoading(false);
     });
 
-    const unsubscribeReservations = subscribeToActiveReservations(setReservasActivas);
+    const unsubscribeReservations = subscribeToUserActiveReservations(currentUser?.email, setReservasActivas);
 
     return () => {
       unsubscribeBooks();
