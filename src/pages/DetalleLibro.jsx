@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { subscribeToBookById, reserveBookById, updateBookStock } from '../bookService.js';
+import { subscribeToBookById, addReservation, updateBookStock } from '../bookService.js';
 import './DetalleLibro.css';
 
 const DetalleLibro = () => {
@@ -10,6 +10,10 @@ const DetalleLibro = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isReserving, setIsReserving] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  const [showResModal, setShowResModal] = useState(false);
+  const [pickupDate, setPickupDate] = useState(new Date().toISOString().split('T')[0]);
+  const [returnDate, setReturnDate] = useState('');
   
   // Estados para modificar el stock
   const [newStock, setNewStock] = useState('');
@@ -27,10 +31,15 @@ const DetalleLibro = () => {
     return () => unsubscribe();
   }, [id]);
 
-  const handleReserve = async () => {
+  const confirmReservation = async () => {
+    if (!pickupDate || !returnDate) {
+      alert('Por favor selecciona las fechas.');
+      return;
+    }
     setIsReserving(true);
-    const response = await reserveBookById(book.id);
+    const response = await addReservation(book, pickupDate, returnDate);
     setIsReserving(false);
+    setShowResModal(false);
     
     if (response.success) {
       setShowModal(true);
@@ -75,10 +84,10 @@ const DetalleLibro = () => {
 
           <button 
             className="reserve-btn-large" 
-            onClick={handleReserve}
+            onClick={() => setShowResModal(true)}
             disabled={!isAvailable || isReserving}
           >
-            {isReserving ? 'Procesando...' : 'Reservar Libro en 1 Clic'}
+            Reservar
           </button>
 
           {/* Controles de Administrador */}
@@ -104,6 +113,27 @@ const DetalleLibro = () => {
           <div className="modal-content">
             <span>✅ Confirmación Exitosa</span>
             <p>Has reservado "{book.title}" con éxito.</p>
+          </div>
+        </div>
+      )}
+
+      {showResModal && (
+        <div className="reservation-modal-overlay">
+          <div className="reservation-modal-content">
+            <h3>📅 Programar Reserva</h3>
+            <p>Selecciona las fechas para retirar y devolver el libro.</p>
+            <div className="date-group">
+              <label>Fecha de Retiro:</label>
+              <input type="date" value={pickupDate} onChange={(e) => setPickupDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
+            </div>
+            <div className="date-group">
+              <label>Fecha de Devolución:</label>
+              <input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} min={pickupDate} />
+            </div>
+            <div className="modal-actions">
+              <button className="cancel-btn" onClick={() => setShowResModal(false)}>Cancelar</button>
+              <button className="confirm-btn" onClick={confirmReservation} disabled={isReserving}>{isReserving ? 'Procesando...' : 'Confirmar Reserva'}</button>
+            </div>
           </div>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, updateDoc, onSnapshot, addDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, onSnapshot, addDoc, getDoc, query, where } from 'firebase/firestore';
 import { db } from './firebase.js';
 
 export const getBooks = async () => {
@@ -14,6 +14,56 @@ export const getBooks = async () => {
     console.error("Error al obtener libros de Firebase:", error);
     return [];
   }
+};
+
+export const addReservation = async (book, pickupDate, returnDate) => {
+  try {
+    await addDoc(collection(db, 'reservations'), {
+      bookId: book.id,
+      bookTitle: book.title,
+      pickupDate,
+      returnDate,
+      status: 'active',
+      createdAt: new Date().toISOString()
+    });
+
+    const bookRef = doc(db, 'books', book.id);
+    const bookSnap = await getDoc(bookRef);
+    if (bookSnap.exists()) {
+      const bookData = bookSnap.data();
+      const currentStock = bookData.stock !== undefined ? bookData.stock : (bookData.available ? 1 : 0);
+      if (currentStock > 0) {
+        await updateDoc(bookRef, { stock: currentStock - 1, available: currentStock - 1 > 0 });
+      }
+    }
+    return { success: true };
+  } catch (error) {
+    console.error("Error al reservar:", error);
+    return { success: false };
+  }
+};
+
+export const subscribeToActiveReservations = (callback) => {
+  const q = query(collection(db, 'reservations'), where('status', '==', 'active'));
+  return onSnapshot(q, (snapshot) => callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+};
+
+export const subscribeToHistoryReservations = (callback) => {
+  const q = query(collection(db, 'reservations'), where('status', '==', 'returned'));
+  return onSnapshot(q, (snapshot) => callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+};
+
+export const returnReservation = async (reservationId, bookId) => {
+  try {
+    // Guardamos la fecha y hora completa en formato ISO
+    await updateDoc(doc(db, 'reservations', reservationId), { status: 'returned', returnedAt: new Date().toISOString() });
+    const bookRef = doc(db, 'books', bookId);
+    const bookSnap = await getDoc(bookRef);
+    if (bookSnap.exists()) {
+      const currentStock = bookSnap.data().stock !== undefined ? bookSnap.data().stock : 0;
+      await updateDoc(bookRef, { stock: currentStock + 1, available: true });
+    }
+  } catch (e) { console.error(e); }
 };
 
 export const subscribeToBooks = (callback) => {

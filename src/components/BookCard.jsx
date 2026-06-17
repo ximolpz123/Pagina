@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { reserveBookById } from '../bookService.js';
+import { addReservation } from '../bookService.js';
 import './BookCard.css';
 
 const BookCard = ({ book }) => {
   const [isReserving, setIsReserving] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showResModal, setShowResModal] = useState(false);
+  const [pickupDate, setPickupDate] = useState(new Date().toISOString().split('T')[0]);
+  const [returnDate, setReturnDate] = useState('');
   const navigate = useNavigate();
 
-  const handleReserve = async () => {
+  const confirmReservation = async () => {
+    if (!pickupDate || !returnDate) {
+      alert('Por favor selecciona las fechas.');
+      return;
+    }
     setIsReserving(true);
-    // Llamada simulada a la base de datos
-    const response = await reserveBookById(book.id);
+    const response = await addReservation(book, pickupDate, returnDate);
     setIsReserving(false);
+    setShowResModal(false);
     
     if (response.success) {
       setShowModal(true);
-      setTimeout(() => setShowModal(false), 3000); // Ocultar alerta en 3 seg
+      setTimeout(() => setShowModal(false), 3000);
     }
   };
 
@@ -47,10 +54,10 @@ const BookCard = ({ book }) => {
 
         <button 
           className="reserve-btn" 
-          onClick={handleReserve}
+          onClick={() => setShowResModal(true)}
           disabled={!isAvailable || isReserving}
         >
-          {isReserving ? 'Procesando...' : 'Reservar en 1 Clic'}
+          Reservar
         </button>
       </div>
       
@@ -59,6 +66,26 @@ const BookCard = ({ book }) => {
           <div className="modal-content">
             <span>✅ Confirmación Exitosa</span>
             <p>Se ha reservado "{book.title}".</p>
+          </div>
+        </div>
+      )}
+
+      {showResModal && (
+        <div className="reservation-modal-overlay">
+          <div className="reservation-modal-content">
+            <h3>📅 Programar Reserva</h3>
+            <div className="date-group">
+              <label>Fecha de Retiro:</label>
+              <input type="date" value={pickupDate} onChange={(e) => setPickupDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
+            </div>
+            <div className="date-group">
+              <label>Fecha de Devolución:</label>
+              <input type="date" value={returnDate} onChange={(e) => setReturnDate(e.target.value)} min={pickupDate} />
+            </div>
+            <div className="modal-actions">
+              <button className="cancel-btn" onClick={() => setShowResModal(false)}>Cancelar</button>
+              <button className="confirm-btn" onClick={confirmReservation} disabled={isReserving}>{isReserving ? '...' : 'Confirmar'}</button>
+            </div>
           </div>
         </div>
       )}

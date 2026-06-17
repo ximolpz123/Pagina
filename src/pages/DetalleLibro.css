@@ -135,3 +135,26 @@
 }
 
 .stock-control button:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* Reservation Modal */
+.reservation-modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px);
+  display: flex; justify-content: center; align-items: center; z-index: 100;
+}
+
+.reservation-modal-content {
+  background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.reservation-modal-content h3 { color: var(--text-main); margin-bottom: 0.5rem; }
+.reservation-modal-content p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+.date-group { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1rem; }
+.date-group label { font-size: 0.85rem; font-weight: 600; color: #475569; }
+.date-group input { padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; }
+
+.modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+.cancel-btn { flex: 1; padding: 0.8rem; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.confirm-btn { flex: 1; padding: 0.8rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
