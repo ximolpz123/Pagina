@@ -11,6 +11,33 @@ const MiPerfil = () => {
   const [error, setError] = useState('');
   const [activeReservations, setActiveReservations] = useState([]);
   const [historyReservations, setHistoryReservations] = useState([]);
+  const [finesPaid, setFinesPaid] = useState(false);
+
+  // Helper para formato YYYY-MM-DD
+  const getFormattedDate = (dateObj) => {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const calcularMulta = () => {
+    if (finesPaid) return 0;
+
+    let totalMulta = 0;
+    const todayStr = getFormattedDate(new Date());
+
+    // Multas por libros actualmente atrasados
+    activeReservations.forEach(res => {
+      if (res.returnDate && todayStr > res.returnDate) {
+        totalMulta += 5000;
+      }
+    });
+
+    return totalMulta;
+  };
+
+  const multasPendientes = calcularMulta();
 
   useEffect(() => {
     if (!currentUser?.email) return;
@@ -58,10 +85,21 @@ const MiPerfil = () => {
             <p className="stat-value">{activeReservations.length}</p>
             <p className="stat-desc">En tu poder actualmente</p>
           </div>
-          <div className="stat-card danger">
+          <div className={`stat-card ${multasPendientes > 0 ? 'danger' : 'success'}`}>
             <h3>Multas Pendientes</h3>
-            <p className="stat-value">$0</p>
-            <p className="stat-desc">Al día sin deudas</p>
+            <p className="stat-value">${multasPendientes.toLocaleString('es-CL')}</p>
+            <p className="stat-desc">{multasPendientes > 0 ? 'Tienes multas por atrasos' : 'Al día sin deudas'}</p>
+            {multasPendientes > 0 && (
+              <button 
+                onClick={() => {
+                  alert('¡Multa pagada exitosamente! Recuerda devolver tus libros atrasados.');
+                  setFinesPaid(true);
+                }}
+                style={{ marginTop: '10px', padding: '5px 10px', backgroundColor: 'var(--danger-color, #e74c3c)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 'bold' }}
+              >
+                Pagar multas
+              </button>
+            )}
           </div>
         </section>
 
