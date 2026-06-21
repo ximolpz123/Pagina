@@ -11,6 +11,7 @@ const BookCard = ({ book, creditosDisponibles }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showCreditLimitModal, setShowCreditLimitModal] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
+  const [stockRequested, setStockRequested] = useState(false);
   const [pickupDate, setPickupDate] = useState(new Date().toISOString().split('T')[0]);
   const [returnDate, setReturnDate] = useState(() => {
     const date = new Date();
@@ -56,8 +57,10 @@ const BookCard = ({ book, creditosDisponibles }) => {
 
   // Solicitar stock a la biblioteca
   const handleRequestStock = () => {
+    if (stockRequested) return;
+    setStockRequested(true);
     setShowRequestModal(true);
-    setTimeout(() => setShowRequestModal(false), 3000);
+    setTimeout(() => setShowRequestModal(false), 4000);
   };
 
   return (
@@ -77,8 +80,12 @@ const BookCard = ({ book, creditosDisponibles }) => {
               Reservar
             </button>
           ) : (
-            <button className="request-stock-btn" onClick={handleRequestStock}>
-              🔔 Solicitar Stock
+            <button 
+              className="request-stock-btn" 
+              onClick={handleRequestStock}
+              disabled={stockRequested}
+            >
+              {stockRequested ? '✅ Ya solicitado' : '🔔 Solicitar Stock'}
             </button>
           )}
         </div>
@@ -94,9 +101,12 @@ const BookCard = ({ book, creditosDisponibles }) => {
 
       {/* Modal de Solicitud de Stock */}
       {showRequestModal && (
-        <div className="success-modal request-modal">
-          <span>¡Solicitud Enviada! 📨</span>
-          <p>Se ha notificado a la biblioteca para reponer "{book.title}".</p>
+        <div className="request-modal-top">
+          <div className="request-modal-icon">📨</div>
+          <div className="request-modal-text">
+            <span>¡Solicitud Enviada!</span>
+            <p>Se notificó a la biblioteca para reponer "{book.title}".</p>
+          </div>
         </div>
       )}
 

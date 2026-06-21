@@ -97,8 +97,57 @@
 .modal-content span { font-weight: bold; display: block; margin-bottom: 0.25rem; }
 @keyframes slideUp { from { bottom: -50px; opacity: 0; } to { bottom: 20px; opacity: 1; } }
 
-.success-modal.request-modal {
-  background-color: var(--tertiary-color);
+.request-stock-btn:disabled {
+  background-color: #cbd5e1;
+  color: #475569;
+  cursor: not-allowed;
+}
+
+.request-modal-top {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border-left: 5px solid var(--tertiary-color, #f39c12);
+  color: var(--text-main, #333);
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  width: 90%;
+  max-width: 400px;
+}
+
+.request-modal-icon {
+  font-size: 2rem;
+}
+
+.request-modal-text {
+  text-align: left;
+}
+
+.request-modal-text span {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--tertiary-color, #f39c12);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.request-modal-text p {
+  font-size: 0.9rem;
+  margin: 0;
+  color: #475569;
+}
+
+@keyframes slideDown {
+  from { top: -50px; opacity: 0; }
+  to { top: 20px; opacity: 1; }
 }
 
 /* Reservation Modal */

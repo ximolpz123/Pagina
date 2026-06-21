@@ -126,7 +126,9 @@ const MiPerfil = () => {
           <h3 className="section-title">Historial de Devoluciones</h3>
           <div className="book-list">
             {historyReservations.length > 0 ? (
-              historyReservations.map(res => (
+              [...historyReservations]
+                .sort((a, b) => new Date(b.returnedAt || 0) - new Date(a.returnedAt || 0))
+                .map(res => (
                 <div key={res.id} className="perfil-book-card history-card">
                   <div className="book-info-basic">
                     <h4>{res.bookTitle}</h4>
