@@ -85,3 +85,38 @@
 .stock-control { display: flex; gap: 1rem; }
 .stock-control input { width: 80px; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--tertiary-color); background: transparent; color: var(--text-main); }
 .stock-control button { padding: 0.5rem 1rem; border-radius: 8px; border: none; background: var(--secondary-color); color: var(--text-main); font-weight: 600; cursor: pointer; }
+
+.status-badge.available { background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.5rem 1rem; border-radius: 99px; font-weight: bold; display: inline-block; margin-bottom: 1.5rem; }
+.status-badge.last-copy { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); padding: 0.5rem 1rem; border-radius: 99px; font-weight: bold; display: inline-block; margin-bottom: 1.5rem; }
+.status-badge.unavailable { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 0.5rem 1rem; border-radius: 99px; font-weight: bold; display: inline-block; margin-bottom: 1.5rem; }
+
+.request-stock-btn-large {
+  width: 100%;
+  max-width: 400px;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--tertiary-color);
+  background-color: transparent;
+  color: var(--tertiary-color);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.request-stock-btn-large:hover:not(:disabled) {
+  background-color: var(--tertiary-color);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.request-stock-btn-large:disabled {
+  background-color: #cbd5e1;
+  color: #475569;
+  border-color: #cbd5e1;
+  cursor: not-allowed;
+}

@@ -18,7 +18,9 @@ const DetalleLibro = () => {
   
   const [reservasActivas, setReservasActivas] = useState([]);
   const [showCreditLimitModal, setShowCreditLimitModal] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [reviews, setReviews] = useState([]);
+  const [stockRequested, setStockRequested] = useState(false);
 
   const [newStock, setNewStock] = useState('');
 
@@ -52,7 +54,18 @@ const DetalleLibro = () => {
   const handleReserveClick = async () => {
     const creditosDisponibles = 5 - (reservasActivas?.length || 0);
     if (creditosDisponibles <= 0) return setShowCreditLimitModal(true);
+
+    const isDuplicate = reservasActivas.some(r => r.bookId === book.id);
+    if (isDuplicate) {
+      setShowDuplicateModal(true);
+      return;
+    }
     
+    await executeReservation();
+  };
+
+  const executeReservation = async () => {
+    setShowDuplicateModal(false);
     const today = new Date().toISOString().split('T')[0];
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 7);
@@ -77,7 +90,9 @@ const DetalleLibro = () => {
   };
 
   const handleRequestStock = () => {
-    alert(`🔔 Se ha notificado a la biblioteca para solicitar más stock de "${book.title}".`);
+    if (stockRequested) return;
+    setStockRequested(true);
+    toast.success(`Se notificó a la biblioteca para reponer "${book.title}".`, { icon: '📨', duration: 4000 });
   };
 
   const handleStockUpdate = async () => {
@@ -113,6 +128,16 @@ const DetalleLibro = () => {
   const isAvailable = stock > 0;
   const renderStars = () => '⭐'.repeat(book.rating) + '☆'.repeat(5 - book.rating);
 
+  let statusClass = 'unavailable';
+  let statusText = '🔴 Agotado / Prestado';
+  if (stock > 1) {
+    statusClass = 'available';
+    statusText = `🟢 Disponible (${stock})`;
+  } else if (stock === 1) {
+    statusClass = 'last-copy';
+    statusText = '🟡 Última copia';
+  }
+
   return (
     <main>
       <div className="detalle-container">
@@ -129,8 +154,8 @@ const DetalleLibro = () => {
             <p className="detalle-author">por {book.author}</p>
             <div className="detalle-rating">{renderStars()}</div>
             
-            <span className={`status-badge ${isAvailable ? 'available' : 'unavailable'}`}>
-              {isAvailable ? `Disponible (Quedan ${stock})` : 'Agotado'}
+            <span className={`status-badge ${statusClass}`}>
+              {statusText}
             </span>
             
             <div className="detalle-synopsis">
@@ -145,8 +170,12 @@ const DetalleLibro = () => {
                 </button>
               </div>
             ) : (
-              <button className="request-stock-btn-large" onClick={handleRequestStock}>
-                🔔 Solicitar Stock a Biblioteca
+              <button 
+                className="request-stock-btn-large" 
+                onClick={handleRequestStock}
+                disabled={stockRequested}
+              >
+                {stockRequested ? '✅ Ya solicitado' : '🔔 Solicitar Stock a Biblioteca'}
               </button>
             )}
 
@@ -208,6 +237,21 @@ const DetalleLibro = () => {
           </div>
         </div>
       )}
+      {/* Modal de Reserva Duplicada */}
+      {showDuplicateModal && (
+        <div className="reservation-modal-overlay">
+          <div className="reservation-modal-content warning-modal glass-panel">
+            <span className="warning-icon" style={{ color: 'var(--tertiary-color)' }}>🔄</span>
+            <h3 style={{ color: 'var(--text-main)' }}>¿Reservar otra copia?</h3>
+            <p>Ya tienes una reserva activa de este libro. ¿Estás seguro de que quieres volver a reservarlo?</p>
+            <div className="modal-actions">
+              <button className="cancel-btn" onClick={() => setShowDuplicateModal(false)}>Cancelar</button>
+              <button className="confirm-btn" style={{ background: 'var(--tertiary-color)' }} onClick={executeReservation}>Sí, Reservar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 };

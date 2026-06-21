@@ -6,17 +6,27 @@ import './BookCard.css';
 import { useAuth } from '../context/AuthContext';
 import { Heart } from 'lucide-react';
 
-const BookCard = ({ book, creditosDisponibles }) => {
+const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsButton, reservasActivas = [] }) => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [showCreditLimitModal, setShowCreditLimitModal] = useState(false);
-  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [stockRequested, setStockRequested] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
   const stock = book.stock !== undefined ? book.stock : (book.available ? 1 : 0);
   const isAvailable = stock > 0;
   const rating = book.rating || 4;
+
+  let statusClass = 'unavailable';
+  let statusText = '🔴 Agotado / Prestado';
+  if (stock > 1) {
+    statusClass = 'available';
+    statusText = `🟢 Disponible (${stock})`;
+  } else if (stock === 1) {
+    statusClass = 'last-copy';
+    statusText = '🟡 Última copia';
+  }
 
   useEffect(() => {
     const favKey = `fav_${currentUser?.email || 'guest'}`;
@@ -32,6 +42,17 @@ const BookCard = ({ book, creditosDisponibles }) => {
     }
     if (creditosDisponibles <= 0) return setShowCreditLimitModal(true);
     
+    const isDuplicate = reservasActivas.some(r => r.bookId === book.id);
+    if (isDuplicate) {
+      setShowDuplicateModal(true);
+      return;
+    }
+    
+    await executeReservation();
+  };
+
+  const executeReservation = async () => {
+    setShowDuplicateModal(false);
     // Reserva Express (1-Click)
     const today = new Date().toISOString().split('T')[0];
     const nextWeek = new Date();
@@ -62,8 +83,7 @@ const BookCard = ({ book, creditosDisponibles }) => {
   const handleRequestStock = () => {
     if (stockRequested) return;
     setStockRequested(true);
-    setShowRequestModal(true);
-    setTimeout(() => setShowRequestModal(false), 4000);
+    toast.success(`Se notificó a la biblioteca para reponer "${book.title}".`, { icon: '📨', duration: 4000 });
   };
 
   const toggleFavorite = (e) => {
@@ -103,41 +123,34 @@ const BookCard = ({ book, creditosDisponibles }) => {
           <p className="book-author">{book.author}</p>
           <div className="book-rating">{renderStars()}</div>
           
-          <span className={`status-badge ${isAvailable ? 'available' : 'unavailable'}`}>
-            {isAvailable ? `Disponible (${stock})` : 'Agotado'}
+          <span className={`status-badge ${statusClass}`}>
+            {statusText}
           </span>
           
-          {isAvailable ? (
-            <div className="action-buttons">
-              <button className="reserve-btn" onClick={handleReserveClick}>
-                Reservar
+          <div className="book-actions">
+            {!hideReserveButton && isAvailable && (
+              <button className="reserve-btn" onClick={handleReserveClick} title="Reserva rápida por 1 semana">
+                ⚡ Reserva
               </button>
-            </div>
-          ) : (
-            <button 
-              className="request-stock-btn" 
-              onClick={handleRequestStock}
-              disabled={stockRequested}
-            >
-              {stockRequested ? '✅ Ya solicitado' : '🔔 Solicitar Stock'}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Modal de Solicitud de Stock */}
-      {showRequestModal && (
-        <div className="request-modal-top">
-          <div className="request-modal-icon">📨</div>
-          <div className="request-modal-text">
-            <span>¡Solicitud Enviada!</span>
-            <p>Se notificó a la biblioteca para reponer "{book.title}".</p>
+            )}
+            {!isAvailable && !hideReserveButton && (
+              <button 
+                className="request-stock-btn" 
+                onClick={handleRequestStock}
+                disabled={stockRequested}
+              >
+                {stockRequested ? '✅ Ya solicitado' : '🔔 Solicitar Stock'}
+              </button>
+            )}
+            {!hideDetailsButton && (
+              <button className="details-btn" onClick={() => navigate(`/libro/${book.id}`)}>
+                Ver Detalles
+              </button>
+            )}
           </div>
         </div>
-      )}
-
-
-
+      </div>
+      
       {/* Modal de Límite de Créditos */}
       {showCreditLimitModal && (
         <div className="reservation-modal-overlay">
@@ -148,6 +161,20 @@ const BookCard = ({ book, creditosDisponibles }) => {
             <div className="modal-actions">
               <button className="cancel-btn" onClick={() => setShowCreditLimitModal(false)}>Entendido</button>
               <button className="confirm-btn" onClick={() => { setShowCreditLimitModal(false); navigate('/perfil'); }}>Ir a Mi Perfil</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal de Reserva Duplicada */}
+      {showDuplicateModal && (
+        <div className="reservation-modal-overlay">
+          <div className="reservation-modal-content warning-modal glass-panel">
+            <span className="warning-icon" style={{ color: 'var(--tertiary-color)' }}>🔄</span>
+            <h3 style={{ color: 'var(--text-main)' }}>¿Reservar otra copia?</h3>
+            <p>Ya tienes una reserva activa de este libro. ¿Estás seguro de que quieres volver a reservarlo?</p>
+            <div className="modal-actions">
+              <button className="cancel-btn" onClick={() => setShowDuplicateModal(false)}>Cancelar</button>
+              <button className="confirm-btn" style={{ background: 'var(--tertiary-color)' }} onClick={executeReservation}>Sí, Reservar</button>
             </div>
           </div>
         </div>

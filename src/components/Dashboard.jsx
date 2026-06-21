@@ -112,7 +112,7 @@ const Dashboard = () => {
       <div className="carousel-container">
         {items.length > 0 ? items.map(book => (
           <div key={book.id} className="carousel-item">
-            <BookCard book={book} creditosDisponibles={creditosDisponibles} />
+            <BookCard book={book} creditosDisponibles={creditosDisponibles} reservasActivas={reservasActivas} hideReserveButton={true} />
           </div>
         )) : (
           <p className="loading-text">Cargando...</p>
@@ -215,7 +215,12 @@ const Dashboard = () => {
             
             <div className="about-header">
               <h2>📚 Sobre Nuestra Biblioteca</h2>
-              <p>Tu portal inteligente para descubrir, reservar y disfrutar de los mejores libros.</p>
+              <p>
+                Bienvenido al sistema digital de la biblioteca universitaria. 
+                Esta plataforma está diseñada para facilitar tu vida académica: explora nuestro 
+                catálogo, reserva tus libros y materiales en línea desde cualquier lugar, y luego 
+                acércate físicamente a la biblioteca del campus para retirarlos rápidamente.
+              </p>
             </div>
 
             <div className="about-sections">
@@ -223,12 +228,12 @@ const Dashboard = () => {
                 <h3>🎯 ¿Cómo funciona?</h3>
                 <ol>
                   <li>
-                    <strong>Busca:</strong> Usa nuestro buscador inteligente por voz, escáner de ISBN <em>(el código de barras único que identifica a cada libro)</em> o filtros dinámicos.
+                    <strong>Busca:</strong> Usa nuestro buscador inteligente por voz, escáner de ISBN <em>(el código de barras único que identifica a cada libro)</em> o filtros dinámicos. Fíjate en los colores: 🟢 Disponible, 🟡 Última copia, 🔴 Agotado.
                   </li>
                   <li>
                     <strong>Reserva:</strong> Usa el botón de "Reserva" (a 1 Click) para apartar el libro por 7 días.
                   </li>
-                  <li><strong>Retira:</strong> Ve a "Mi Perfil", muestra tu Código QR al bibliotecario y llévate tu libro.</li>
+                  <li><strong>Retira:</strong> Ve a "Mi Perfil" y muestra tu Código QR al bibliotecario (puedes hacerle clic para agrandarlo).</li>
                 </ol>
               </div>
 

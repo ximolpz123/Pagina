@@ -43,6 +43,7 @@ const Busqueda = () => {
   
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filterCategory, setFilterCategory] = useState('Todas');
+  const [availabilityFilter, setAvailabilityFilter] = useState('Todos'); // Todos, Disponibles, Agotados
   const [maxRating, setMaxRating] = useState(5);
   const [showFilters, setShowFilters] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -135,14 +136,21 @@ const Busqueda = () => {
     // 3. Filtro visual de Rating (Estrellas)
     const matchesRating = book.rating <= maxRating;
 
-    return matchesSearch && matchesCategory && matchesRating;
+    // 4. Filtro de Disponibilidad
+    const stock = book.stock !== undefined ? book.stock : (book.available ? 1 : 0);
+    const isAvailable = stock > 0;
+    let matchesAvailability = true;
+    if (availabilityFilter === 'Disponibles') matchesAvailability = isAvailable;
+    else if (availabilityFilter === 'Agotados') matchesAvailability = !isAvailable;
+
+    return matchesSearch && matchesCategory && matchesRating && matchesAvailability;
   });
 
   return (
     <div className="busqueda-container">
       <header className="busqueda-header glass-panel">
         <h2>Busca tu libro favorito 🔍</h2>
-        <p>Encuentra por título, autor o escanea el ISBN</p>
+        <p>Encuentra por título, por filtros o escanea el ISBN</p>
       </header>
       
       <main className="busqueda-main">
@@ -189,6 +197,21 @@ const Busqueda = () => {
           <div className={`advanced-filters ${showFilters ? 'open' : ''}`}>
             
             <div className="filter-block">
+              <span className="filter-label">Disponibilidad</span>
+              <div className="chips-container" style={{ marginBottom: '1rem' }}>
+                {['Todos', 'Disponibles', 'Agotados'].map(av => (
+                  <button 
+                    key={av} 
+                    className={`chip ${availabilityFilter === av ? 'active' : ''}`}
+                    onClick={() => setAvailabilityFilter(av)}
+                  >
+                    {av}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="filter-block">
               <span className="filter-label">Categorías Rápidas</span>
               <div className="chips-container">
                 {MAIN_CATEGORIES.map(cat => (
@@ -228,7 +251,7 @@ const Busqueda = () => {
             [...Array(8)].map((_, i) => <BookCardSkeleton key={i} />)
           ) : (
             filteredBooks.length > 0 ? (
-              filteredBooks.map((book) => <BookCard key={book.id} book={book} creditosDisponibles={5 - reservasActivas.length} />)
+              filteredBooks.map((book) => <BookCard key={book.id} book={book} creditosDisponibles={5 - reservasActivas.length} reservasActivas={reservasActivas} hideDetailsButton={true} />)
             ) : (
               <div className="no-results glass-panel">
                 <span className="no-results-icon">😕</span>
