@@ -101,7 +101,72 @@
 .desktop-return-box {
   display: flex;
   align-items: center;
-  margin-right: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* EDICIÓN DE PERFIL */
+.config-section h4 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.profile-view-box p {
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.btn-edit-profile {
+  background: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  transition: all 0.2s;
+}
+.btn-edit-profile:hover {
+  background: rgba(var(--primary-color), 0.1);
+}
+
+.profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-edit-form label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+.profile-edit-form input {
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid rgba(150, 150, 150, 0.2);
+  background: var(--nav-bg);
+  color: var(--text-main);
+}
+
+.btn-save-profile {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-cancel-profile {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--text-muted);
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .desktop-return-btn {
@@ -226,3 +291,18 @@
 .config-actions { display: flex; flex-direction: column; gap: 0.8rem; }
 .logout-btn { background: var(--danger-color); color: white; padding: 0.8rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
 .close-config-btn { background: var(--secondary-color); color: var(--text-main); padding: 0.8rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; }
+
+.review-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(150, 150, 150, 0.2);
+  background: var(--nav-bg);
+  color: var(--text-main);
+  resize: vertical;
+  font-family: inherit;
+}
+.review-modal {
+  max-width: 400px;
+}

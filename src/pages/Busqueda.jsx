@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BookCard from '../components/BookCard.jsx';
 import { subscribeToBooks, subscribeToUserActiveReservations } from '../bookService.js';
+import { BookCardSkeleton } from '../components/Skeletons.jsx';
 import { Mic, ScanBarcode, Search as SearchIcon, SlidersHorizontal } from 'lucide-react';
 import './Busqueda.css';
 import { useAuth } from '../context/AuthContext';
@@ -224,7 +225,7 @@ const Busqueda = () => {
         
         <section className="books-grid">
           {isLoading ? (
-            <p className="loading-text">Cargando la magia...</p>
+            [...Array(8)].map((_, i) => <BookCardSkeleton key={i} />)
           ) : (
             filteredBooks.length > 0 ? (
               filteredBooks.map((book) => <BookCard key={book.id} book={book} creditosDisponibles={5 - reservasActivas.length} />)

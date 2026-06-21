@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { subscribeToBookById, addReservation, updateBookStock, subscribeToUserActiveReservations } from '../bookService.js';
-import { Heart } from 'lucide-react';
+import { subscribeToBookById, addReservation, updateBookStock, subscribeToUserActiveReservations, getBookReviews } from '../bookService.js';
+import toast from 'react-hot-toast';
+import { Heart, Star } from 'lucide-react';
 import './DetalleLibro.css';
 import { useAuth } from '../context/AuthContext';
 
@@ -17,7 +18,7 @@ const DetalleLibro = () => {
   
   const [reservasActivas, setReservasActivas] = useState([]);
   const [showCreditLimitModal, setShowCreditLimitModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [reviews, setReviews] = useState([]);
 
   const [newStock, setNewStock] = useState('');
 
@@ -38,6 +39,8 @@ const DetalleLibro = () => {
     });
 
     const unsubscribeReservations = subscribeToUserActiveReservations(currentUser?.email, setReservasActivas);
+    
+    getBookReviews(id).then(data => setReviews(data));
 
     return () => {
       if (typeof unsubscribeBook === 'function') unsubscribeBook();
@@ -55,12 +58,21 @@ const DetalleLibro = () => {
     nextWeek.setDate(nextWeek.getDate() + 7);
     const returnDay = nextWeek.toISOString().split('T')[0];
     
+    const toastId = toast.loading('Procesando reserva...');
     const response = await addReservation(book, today, returnDay, currentUser?.email);
+    
     if (response.success) {
-      setShowSuccessModal(true);
-      setTimeout(() => { setShowSuccessModal(false); navigate('/perfil'); }, 2000);
+      toast.success(
+        <div>
+          <b>¡Reserva Exitosa!</b><br/>
+          Has reservado "{book.title}".<br/>
+          <span style={{ fontSize: '0.8rem', color: '#f59e0b' }}>⚠️ Recuerda devolverlo en máximo 1 semana.</span>
+        </div>,
+        { id: toastId, duration: 5000 }
+      );
+      setTimeout(() => navigate('/perfil'), 2000);
     } else {
-      alert('Hubo un error al procesar la reserva.');
+      toast.error('Hubo un error al procesar la reserva.', { id: toastId });
     }
   };
 
@@ -102,7 +114,7 @@ const DetalleLibro = () => {
   const renderStars = () => '⭐'.repeat(book.rating) + '☆'.repeat(5 - book.rating);
 
   return (
-    <>
+    <main>
       <div className="detalle-container">
         <button onClick={() => navigate(-1)} className="back-btn">← Volver</button>
         <div className="detalle-content glass-panel">
@@ -147,22 +159,41 @@ const DetalleLibro = () => {
             </div>
           </div>
         </div>
+
+        <section className="reviews-section" style={{ marginTop: '2rem' }}>
+          <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--text-main)' }}>Comentarios de los Lectores</h3>
+          {reviews.length > 0 ? (
+            <div className="reviews-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {reviews.map(review => (
+                <div key={review.id} className="review-card glass-panel" style={{ padding: '1rem', borderRadius: '12px' }}>
+                  <div className="review-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {review.userPhoto ? (
+                        <img src={review.userPhoto} alt="Avatar" style={{ width: 24, height: 24, borderRadius: '50%' }} />
+                      ) : (
+                        <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem' }}>
+                          {(review.userDisplayName || '?')[0].toUpperCase()}
+                        </div>
+                      )}
+                      <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{review.userDisplayName}</span>
+                    </div>
+                    <div className="stars">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={14} fill={i < review.rating ? '#f59e0b' : 'transparent'} color={i < review.rating ? '#f59e0b' : 'var(--text-muted)'} />
+                      ))}
+                    </div>
+                  </div>
+                  {review.text && <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>"{review.text}"</p>}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="glass-panel" style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '12px', color: 'var(--text-muted)' }}>
+              Aún no hay reseñas para este libro. ¡Sé el primero en pedirlo y dar tu opinión!
+            </div>
+          )}
+        </section>
       </div>
-
-      {showSuccessModal && (
-        <div className="success-modal-top">
-          <div className="success-modal-icon">✅</div>
-          <div className="success-modal-text">
-            <span>¡Reserva Exitosa!</span>
-            <p>Has reservado "{book.title}". Redirigiendo...</p>
-            <p style={{ fontSize: '0.85rem', color: '#f59e0b', marginTop: '0.3rem', fontWeight: 'bold' }}>
-              ⚠️ Recuerda devolverlo en máximo 1 semana.
-            </p>
-          </div>
-        </div>
-      )}
-
-
 
       {showCreditLimitModal && (
         <div className="reservation-modal-overlay">
@@ -177,7 +208,7 @@ const DetalleLibro = () => {
           </div>
         </div>
       )}
-    </>
+    </main>
   );
 };
 

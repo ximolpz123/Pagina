@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, updateDoc, onSnapshot, addDoc, getDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, onSnapshot, addDoc, getDoc, query, where, runTransaction } from 'firebase/firestore';
 import { db } from './firebase.js';
 
 export const getBooks = async () => {
@@ -161,5 +161,51 @@ export const updateBookStock = async (bookId, newStock) => {
   } catch (error) {
     console.error("Error al actualizar el stock:", error);
     return { success: false };
+  }
+};
+
+export const addReview = async (bookId, userDisplayName, userPhoto, rating, text) => {
+  try {
+    await addDoc(collection(db, 'reviews'), {
+      bookId,
+      userDisplayName: userDisplayName || 'Lector Anónimo',
+      userPhoto: userPhoto || '',
+      rating,
+      text,
+      createdAt: new Date().toISOString()
+    });
+
+    const bookRef = doc(db, 'books', bookId);
+    await runTransaction(db, async (transaction) => {
+      const bookDoc = await transaction.get(bookRef);
+      if (!bookDoc.exists()) return;
+      const data = bookDoc.data();
+      const currentRating = data.rating || 0;
+      const currentCount = data.reviewCount || 0;
+      
+      const newCount = currentCount + 1;
+      const newRating = ((currentRating * currentCount) + rating) / newCount;
+      
+      transaction.update(bookRef, { 
+        rating: parseFloat(newRating.toFixed(1)),
+        reviewCount: newCount 
+      });
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error adding review: ", error);
+    return { success: false, error };
+  }
+};
+
+export const getBookReviews = async (bookId) => {
+  try {
+    const q = query(collection(db, 'reviews'), where('bookId', '==', bookId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } catch (error) {
+    console.error("Error fetching reviews: ", error);
+    return [];
   }
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 
 import Dashboard from './components/Dashboard.jsx';
 import Busqueda from './pages/Busqueda.jsx';
@@ -16,6 +17,20 @@ const MainLayout = () => (
   <div className="app-container">
     <Outlet /> {/* Aquí se renderizarán las páginas protegidas */}
     <Navbar />
+    <Toaster 
+      position="bottom-right"
+      toastOptions={{
+        style: {
+          background: 'rgba(30, 41, 59, 0.9)',
+          color: '#f8fafc',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(150, 150, 150, 0.2)',
+          padding: '16px',
+          borderRadius: '12px'
+        },
+        success: { iconTheme: { primary: '#10b981', secondary: '#fff' } }
+      }}
+    />
   </div>
 );
 

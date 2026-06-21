@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, Resp
 import BookCard from './BookCard.jsx';
 import './Dashboard.css';
 import { useAuth } from '../context/AuthContext';
+import { DashboardSkeleton } from './Skeletons.jsx';
 
 const PIE_COLORS = ['#308855', '#165B2B', '#C6AA77', '#A08159', '#e11d48', '#db2777', '#f97316', '#f59e0b', '#84cc16', '#22c55e'];
 
@@ -12,6 +13,7 @@ const Dashboard = () => {
   const [reservasActivas, setReservasActivas] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [showAboutModal, setShowAboutModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -33,6 +35,7 @@ const Dashboard = () => {
         rating: b.rating || ((b.title?.length % 3) + 3) // Genera 3, 4 o 5
       }));
       setBooks(booksWithRating);
+      setIsLoading(false);
     });
     const unsubRes = subscribeToUserActiveReservations(currentUser?.email, setReservasActivas);
     
@@ -122,8 +125,8 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <header className="dashboard-header glass-panel" style={{ position: 'relative' }}>
         <div>
-          <h1>Bienvenido de nuevo 👋</h1>
-          <p>¿Qué te gustaría leer hoy?</p>
+          <h1>Bienvenido de nuevo, {currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'Lector'} 👋</h1>
+          <p>¿Qué te gustaría leer hoy, {currentUser?.email}?</p>
         </div>
         <button className="about-btn" onClick={() => setShowAboutModal(true)}>
           📖 ¿Quiénes somos? / Guía
@@ -131,71 +134,77 @@ const Dashboard = () => {
       </header>
       
       <main className="dashboard-main">
-        {/* CARRUSELES PARA EL USUARIO */}
-        {favoriteBooks.length > 0 && renderCarousel("❤️ Mis Favoritos", favoriteBooks)}
-        {renderCarousel("🔥 Tendencias Actuales", popular)}
-        {renderCarousel("✨ Nuevos Ingresos", newReleases)}
-        {renderCarousel("⭐ Recomendados para ti", recommended)}
+        {isLoading ? (
+          <DashboardSkeleton />
+        ) : (
+          <>
+            {/* CARRUSELES PARA EL USUARIO */}
+            {favoriteBooks.length > 0 && renderCarousel("❤️ Mis Favoritos", favoriteBooks)}
+            {renderCarousel("🔥 Tendencias Actuales", popular)}
+            {renderCarousel("✨ Nuevos Ingresos", newReleases)}
+            {renderCarousel("⭐ Recomendados para ti", recommended)}
 
-        {/* ESTADÍSTICAS REQUERIDAS (REINTEGRADAS) */}
-        <section className="stats-header">
-          <h2>📊 Estadísticas de la Biblioteca</h2>
-          <p>Visión general del estado del catálogo</p>
-        </section>
+            {/* ESTADÍSTICAS REQUERIDAS (REINTEGRADAS) */}
+            <section className="stats-header">
+              <h2>📊 Estadísticas de la Biblioteca</h2>
+              <p>Visión general del estado del catálogo</p>
+            </section>
 
-        <section className="kpi-grid">
-          <div className="kpi-card glass-panel">
-            <h3>Total Libros</h3>
-            <p className="kpi-value">{finalTotal}</p>
-          </div>
-          <div className="kpi-card glass-panel">
-            <h3>Disponibles</h3>
-            <p className="kpi-value" style={{color: '#4ade80'}}>{finalAvailable}</p>
-          </div>
-          <div className="kpi-card glass-panel">
-            <h3>En Préstamo</h3>
-            <p className="kpi-value" style={{color: '#f59e0b'}}>{finalBorrowed}</p>
-          </div>
-          <div className="kpi-card glass-panel">
-            <h3>Nuevos este mes</h3>
-            <p className="kpi-value" style={{color: '#a855f7'}}>{finalNew}</p>
-          </div>
-        </section>
+            <section className="kpi-grid">
+              <div className="kpi-card glass-panel">
+                <h3>Total Libros</h3>
+                <p className="kpi-value">{finalTotal}</p>
+              </div>
+              <div className="kpi-card glass-panel">
+                <h3>Disponibles</h3>
+                <p className="kpi-value" style={{color: '#4ade80'}}>{finalAvailable}</p>
+              </div>
+              <div className="kpi-card glass-panel">
+                <h3>En Préstamo</h3>
+                <p className="kpi-value" style={{color: '#f59e0b'}}>{finalBorrowed}</p>
+              </div>
+              <div className="kpi-card glass-panel">
+                <h3>Nuevos este mes</h3>
+                <p className="kpi-value" style={{color: '#a855f7'}}>{finalNew}</p>
+              </div>
+            </section>
 
-        <section className="charts-grid">
-          <div className="chart-card glass-panel">
-            <h3>Distribución por Categorías</h3>
-            <div className="chart-wrapper">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={categoriesDistribution} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                    {categoriesDistribution.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip />
-                  <Legend verticalAlign="bottom" wrapperStyle={{ paddingTop: '20px' }}/>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          
-          <div className="chart-card glass-panel">
-            <h3>Disponibilidad (General)</h3>
-            <div className="chart-wrapper">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={statusDistribution}>
-                  <XAxis dataKey="name" stroke="var(--text-main)" />
-                  <YAxis stroke="var(--text-main)" />
-                  <Tooltip cursor={{fill: 'rgba(150,150,150,0.1)'}} contentStyle={{ backgroundColor: 'var(--card-bg)', border: 'none', borderRadius: '8px', color: 'var(--text-main)' }} />
-                  <Bar dataKey="cantidad" radius={[6, 6, 0, 0]} barSize={50}>
-                    {statusDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index === 0 ? '#4ade80' : '#f59e0b'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </section>
+            <section className="charts-grid">
+              <div className="chart-card glass-panel">
+                <h3>Distribución por Categorías</h3>
+                <div className="chart-wrapper">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={categoriesDistribution} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                        {categoriesDistribution.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip />
+                      <Legend verticalAlign="bottom" wrapperStyle={{ paddingTop: '20px' }}/>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              
+              <div className="chart-card glass-panel">
+                <h3>Disponibilidad (General)</h3>
+                <div className="chart-wrapper">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={statusDistribution}>
+                      <XAxis dataKey="name" stroke="var(--text-main)" />
+                      <YAxis stroke="var(--text-main)" />
+                      <Tooltip cursor={{fill: 'rgba(150,150,150,0.1)'}} contentStyle={{ backgroundColor: 'var(--card-bg)', border: 'none', borderRadius: '8px', color: 'var(--text-main)' }} />
+                      <Bar dataKey="cantidad" radius={[6, 6, 0, 0]} barSize={50}>
+                        {statusDistribution.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={index === 0 ? '#4ade80' : '#f59e0b'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </section>
+          </>
+        )}
       </main>
 
       {/* MODAL QUIÉNES SOMOS / GUÍA */}

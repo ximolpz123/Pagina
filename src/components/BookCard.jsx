@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addReservation } from '../bookService.js';
+import toast from 'react-hot-toast';
 import './BookCard.css';
 import { useAuth } from '../context/AuthContext';
 import { Heart } from 'lucide-react';
@@ -8,7 +9,6 @@ import { Heart } from 'lucide-react';
 const BookCard = ({ book, creditosDisponibles }) => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showCreditLimitModal, setShowCreditLimitModal] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [stockRequested, setStockRequested] = useState(false);
@@ -26,7 +26,10 @@ const BookCard = ({ book, creditosDisponibles }) => {
   }, [book.id, currentUser]);
 
   const handleReserveClick = async () => {
-    if (!isAvailable) return alert('Este libro está agotado y no se puede reservar.');
+    if (!isAvailable) {
+      toast.error('Este libro está agotado y no se puede reservar.');
+      return;
+    }
     if (creditosDisponibles <= 0) return setShowCreditLimitModal(true);
     
     // Reserva Express (1-Click)
@@ -35,12 +38,20 @@ const BookCard = ({ book, creditosDisponibles }) => {
     nextWeek.setDate(nextWeek.getDate() + 7);
     const returnDay = nextWeek.toISOString().split('T')[0];
     
+    const toastId = toast.loading('Procesando reserva...');
     const response = await addReservation(book, today, returnDay, currentUser?.email);
+    
     if (response.success) {
-      setShowSuccessModal(true);
-      setTimeout(() => setShowSuccessModal(false), 3000);
+      toast.success(
+        <div>
+          <b>¡Reserva Exitosa!</b><br/>
+          Has reservado "{book.title}".<br/>
+          <span style={{ fontSize: '0.8rem', color: '#f59e0b' }}>⚠️ Recuerda devolverlo en máximo 1 semana.</span>
+        </div>,
+        { id: toastId, duration: 5000 }
+      );
     } else {
-      alert('Hubo un error al procesar la reserva.');
+      toast.error('Hubo un error al procesar la reserva.', { id: toastId });
     }
   };
 
@@ -63,9 +74,11 @@ const BookCard = ({ book, creditosDisponibles }) => {
     if (isFavorite) {
       favs = favs.filter(id => id !== book.id);
       setIsFavorite(false);
+      toast('Eliminado de favoritos', { icon: '💔' });
     } else {
       favs.push(book.id);
       setIsFavorite(true);
+      toast('Añadido a favoritos', { icon: '❤️' });
     }
     
     localStorage.setItem(favKey, JSON.stringify(favs));
@@ -111,20 +124,6 @@ const BookCard = ({ book, creditosDisponibles }) => {
           )}
         </div>
       </div>
-
-      {/* Modal de Éxito */}
-      {showSuccessModal && (
-        <div className="success-modal-top">
-          <div className="success-modal-icon">✅</div>
-          <div className="success-modal-text">
-            <span>¡Reserva Exitosa!</span>
-            <p>Has reservado "{book.title}".</p>
-            <p style={{ fontSize: '0.85rem', color: '#f59e0b', marginTop: '0.3rem', fontWeight: 'bold' }}>
-              ⚠️ Recuerda devolverlo en máximo 1 semana.
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Modal de Solicitud de Stock */}
       {showRequestModal && (

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, Search, PlusCircle, User, Moon, Sun } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const Navbar = () => {
+  const { currentUser } = useAuth();
   const [isDark, setIsDark] = useState(() => {
     return localStorage.getItem('theme') === 'dark';
   });
@@ -36,8 +38,12 @@ const Navbar = () => {
       </NavLink>
 
       <NavLink to="/perfil" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-        <User className="nav-icon" />
-        <span className="nav-label">Perfil</span>
+        {currentUser?.photoURL ? (
+          <img src={currentUser.photoURL} alt="Perfil" className="nav-icon nav-avatar" style={{width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover'}} />
+        ) : (
+          <User className="nav-icon" />
+        )}
+        <span className="nav-label">{currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'Perfil'}</span>
       </NavLink>
 
       <button className="nav-item theme-toggle" onClick={() => setIsDark(!isDark)}>
