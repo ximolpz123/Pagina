@@ -119,6 +119,9 @@ const BookCard = ({ book, creditosDisponibles }) => {
           <div className="success-modal-text">
             <span>¡Reserva Exitosa!</span>
             <p>Has reservado "{book.title}".</p>
+            <p style={{ fontSize: '0.85rem', color: '#f59e0b', marginTop: '0.3rem', fontWeight: 'bold' }}>
+              ⚠️ Recuerda devolverlo en máximo 1 semana.
+            </p>
           </div>
         </div>
       )}

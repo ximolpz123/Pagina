@@ -44,6 +44,7 @@ const Busqueda = () => {
   const [filterCategory, setFilterCategory] = useState('Todas');
   const [minRating, setMinRating] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   
   const [isLoading, setIsLoading] = useState(true);
 
@@ -66,19 +67,35 @@ const Busqueda = () => {
       unsubscribeBooks();
       unsubscribeReservations();
     };
-  }, []);
+  }, [currentUser?.email]);
 
   const handleVoiceSearch = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.lang = 'es-ES';
-      recognition.start();
+      
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
       recognition.onresult = (e) => {
         setSearchQuery(e.results[0][0].transcript);
+        setShowSuggestions(true);
       };
+
+      recognition.onerror = (e) => {
+        console.error("Error en reconocimiento de voz: ", e.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
     } else {
-      alert("Tu navegador no soporta búsqueda por voz.");
+      alert("Tu navegador (ej. Firefox sin banderas activadas o navegador antiguo) no soporta búsqueda por voz nativa. Te sugerimos usar Chrome o Edge.");
     }
   };
 
@@ -136,7 +153,7 @@ const Busqueda = () => {
             <input 
               type="search" 
               className="global-search-input" 
-              placeholder="Ej: 'Gari poter', ISBN, o Título..." 
+              placeholder={isListening ? "🔴 Escuchando... Habla ahora" : "Ej: 'Gari poter', ISBN, o Título..."}
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -145,8 +162,8 @@ const Busqueda = () => {
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             />
-            <button className="icon-btn" onClick={handleVoiceSearch} title="Búsqueda por Voz">
-              <Mic />
+            <button className={`icon-btn ${isListening ? 'listening-pulse' : ''}`} onClick={handleVoiceSearch} title="Búsqueda por Voz">
+              <Mic color={isListening ? '#ef4444' : 'currentColor'} />
             </button>
             <button className="icon-btn" onClick={handleScannerClick} title="Escanear ISBN">
               <ScanBarcode />

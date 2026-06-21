@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [books, setBooks] = useState([]);
   const [reservasActivas, setReservasActivas] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState([]);
+  const [showAboutModal, setShowAboutModal] = useState(false);
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -119,9 +120,14 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <header className="dashboard-header glass-panel">
-        <h1>Bienvenido de nuevo 👋</h1>
-        <p>¿Qué te gustaría leer hoy?</p>
+      <header className="dashboard-header glass-panel" style={{ position: 'relative' }}>
+        <div>
+          <h1>Bienvenido de nuevo 👋</h1>
+          <p>¿Qué te gustaría leer hoy?</p>
+        </div>
+        <button className="about-btn" onClick={() => setShowAboutModal(true)}>
+          📖 ¿Quiénes somos? / Guía
+        </button>
       </header>
       
       <main className="dashboard-main">
@@ -166,7 +172,7 @@ const Dashboard = () => {
                     {categoriesDistribution.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
                   </Pie>
                   <Tooltip />
-                  <Legend verticalAlign="bottom" height={36}/>
+                  <Legend verticalAlign="bottom" wrapperStyle={{ paddingTop: '20px' }}/>
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -191,6 +197,53 @@ const Dashboard = () => {
           </div>
         </section>
       </main>
+
+      {/* MODAL QUIÉNES SOMOS / GUÍA */}
+      {showAboutModal && (
+        <div className="about-modal-overlay">
+          <div className="about-modal-content glass-panel">
+            <button className="close-about-btn" onClick={() => setShowAboutModal(false)}>✖</button>
+            
+            <div className="about-header">
+              <h2>📚 Sobre Nuestra Biblioteca</h2>
+              <p>Tu portal inteligente para descubrir, reservar y disfrutar de los mejores libros.</p>
+            </div>
+
+            <div className="about-sections">
+              <div className="about-card">
+                <h3>🎯 ¿Cómo funciona?</h3>
+                <ol>
+                  <li><strong>Busca:</strong> Usa nuestro buscador inteligente por voz, título o desliza los filtros.</li>
+                  <li><strong>Reserva:</strong> Usa el botón "⚡ Reserva Rápida" (1-Click) para apartar el libro por 7 días.</li>
+                  <li><strong>Retira:</strong> Ve a "Mi Perfil", muestra el Código QR al bibliotecario y llévate tu libro.</li>
+                </ol>
+              </div>
+
+              <div className="about-card">
+                <h3>⚖️ Reglas y Límites</h3>
+                <ul>
+                  <li>Tienes un límite máximo de <strong>5 libros</strong> en préstamo simultáneo.</li>
+                  <li>El tiempo de préstamo estándar es de <strong>1 semana (7 días)</strong>.</li>
+                  <li>⚠️ <strong>Multas:</strong> Se aplicará una multa de <strong>$5.000 CLP</strong> por cada libro atrasado.</li>
+                </ul>
+              </div>
+
+              <div className="about-card">
+                <h3>✨ Tips Rápidos</h3>
+                <p>
+                  Si te gusta un libro pero no quieres reservarlo aún, dale al corazón (❤️) para guardarlo en tu carrusel personal de Favoritos. Si estás en celular, puedes deslizar tus reservas hacia la izquierda para devolverlas rápidamente.
+                </p>
+              </div>
+            </div>
+
+            <div className="about-footer">
+              <button className="btn-entendido" onClick={() => setShowAboutModal(false)}>
+                ¡Entendido, a leer!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -43,7 +43,8 @@ const DetalleLibro = () => {
       if (typeof unsubscribeBook === 'function') unsubscribeBook();
       if (typeof unsubscribeReservations === 'function') unsubscribeReservations();
     };
-  }, [id]);
+    // eslint-disable-next-line
+  }, [id, currentUser?.email]);
 
   const handleReserveClick = async () => {
     const creditosDisponibles = 5 - (reservasActivas?.length || 0);
@@ -153,7 +154,10 @@ const DetalleLibro = () => {
           <div className="success-modal-icon">✅</div>
           <div className="success-modal-text">
             <span>¡Reserva Exitosa!</span>
-            <p>Has reservado "{book.title}". Redirigiendo a tu perfil...</p>
+            <p>Has reservado "{book.title}". Redirigiendo...</p>
+            <p style={{ fontSize: '0.85rem', color: '#f59e0b', marginTop: '0.3rem', fontWeight: 'bold' }}>
+              ⚠️ Recuerda devolverlo en máximo 1 semana.
+            </p>
           </div>
         </div>
       )}

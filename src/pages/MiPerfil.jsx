@@ -20,6 +20,11 @@ const SwipeableReservation = ({ res, onReturn }) => {
   return (
     <div className="swipe-wrapper" {...handlers}>
       <div className={`swipe-content ${swiped ? 'swiped' : ''} glass-panel`}>
+        <div className="desktop-return-box">
+          <button onClick={() => onReturn(res.id, res.bookId)} className="desktop-return-btn" title="Devolver libro">
+            <RefreshCcw size={20} />
+          </button>
+        </div>
         <div className="res-info-main">
           <h4>{res.bookTitle}</h4>
           <span className="due-date">Devolución: <strong>{res.returnDate}</strong></span>
@@ -97,7 +102,7 @@ const MiPerfil = () => {
     <div className="perfil-container">
       <header className="perfil-header glass-panel">
         <div className="header-user-info">
-          <h2>Mi Biblioteca</h2>
+          <h2>Mi perfil</h2>
           <p>{currentUser?.email}</p>
         </div>
         <button className="settings-btn" onClick={() => setIsConfigOpen(true)}>

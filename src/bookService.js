@@ -51,14 +51,21 @@ export const subscribeToActiveReservations = (callback) => {
 
 export const subscribeToUserActiveReservations = (userEmail, callback) => {
   if (!userEmail) return () => {};
-  const q = query(collection(db, 'reservations'), where('status', '==', 'active'), where('userEmail', '==', userEmail));
-  return onSnapshot(q, (snapshot) => callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+  // Filtramos por email en Firebase, y por status en el cliente para evitar errores de índice compuesto
+  const q = query(collection(db, 'reservations'), where('userEmail', '==', userEmail));
+  return onSnapshot(q, (snapshot) => {
+    const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    callback(docs.filter(d => d.status === 'active'));
+  }, (error) => console.error(error));
 };
 
 export const subscribeToUserHistoryReservations = (userEmail, callback) => {
   if (!userEmail) return () => {};
-  const q = query(collection(db, 'reservations'), where('status', '==', 'returned'), where('userEmail', '==', userEmail));
-  return onSnapshot(q, (snapshot) => callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+  const q = query(collection(db, 'reservations'), where('userEmail', '==', userEmail));
+  return onSnapshot(q, (snapshot) => {
+    const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    callback(docs.filter(d => d.status === 'returned'));
+  }, (error) => console.error(error));
 };
 
 export const subscribeToHistoryReservations = (callback) => {
