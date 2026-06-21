@@ -1,14 +1,30 @@
 :root {
-  /* Paleta Naturaleza / Tierra */
-  --bg-color: #EAE2CA; /* Crema: Fondo Principal */
-  --secondary-color: #C6AA77; /* Arena: Acento Secundario */
-  --tertiary-color: #A08159; /* Tierra: Acento Terciario / Bordes / Inactivos */
-  --primary-color: #308855; /* Verde Hoja: Botones, Disponible */
-  --primary-hover: #165B2B; /* Verde Bosque: Hover de botones */
-  --text-main: #165B2B; /* Verde Bosque: Textos importantes, Títulos */
-  --text-muted: #A08159; /* Tierra para textos secundarios e iconos inactivos */
-  --success-color: #308855; /* Reutilizamos Verde Hoja para éxito general */
+  /* Paleta Naturaleza / Tierra (Light Mode) */
+  --bg-color: #EAE2CA;
+  --secondary-color: #C6AA77;
+  --tertiary-color: #A08159;
+  --primary-color: #308855;
+  --primary-hover: #165B2B;
+  --text-main: #165B2B;
+  --text-muted: #A08159;
+  --success-color: #308855;
   --danger-color: #dc2626;
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --card-bg: white;
+}
+
+[data-theme='dark'] {
+  --bg-color: #121212;
+  --secondary-color: #2a2a2a;
+  --tertiary-color: #404040;
+  --primary-color: #4ade80;
+  --primary-hover: #22c55e;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --success-color: #4ade80;
+  --danger-color: #ef4444;
+  --nav-bg: rgba(18, 18, 18, 0.85);
+  --card-bg: #1e1e1e;
 }
 
 * {

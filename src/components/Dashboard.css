@@ -1,141 +1,135 @@
 .dashboard-container {
-  display: flex;
-  flex-direction: column;
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
   min-height: 100vh;
+  padding-bottom: 80px;
 }
 
 .dashboard-header {
-  background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary-color) 100%);
-  color: white;
-  padding: 2rem 1rem;
-  text-align: center;
-  border-bottom-left-radius: 24px;
-  border-bottom-right-radius: 24px;
-  box-shadow: 0 6px 20px rgba(22, 91, 43, 0.15);
-  margin-bottom: 0.5rem;
+  text-align: left;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  border-radius: 16px;
 }
 
 .dashboard-header h1 {
-  font-size: 1.7rem;
+  font-size: 2.5rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
-  text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
-  margin: 0;
-  animation: headerFadeDown 0.5s ease-out forwards;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
 }
 
-.dashboard-main {
-  padding: 1.5rem 1rem;
-  padding-bottom: 6rem;
-  flex: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+.dashboard-header p {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+}
+
+.carousel-section {
+  margin-bottom: 3rem;
+}
+
+.carousel-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 1rem;
   display: flex;
-  flex-direction: column;
-  gap: 2rem; /* Espacio entre filas */
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* --- Tarjetas KPI --- */
+.carousel-container {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+
+.carousel-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.carousel-item {
+  min-width: 260px;
+  max-width: 280px;
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* ESTADÍSTICAS REINTEGRADAS */
+.stats-header {
+  margin-top: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.stats-header h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.stats-header p {
+  color: var(--text-muted);
+}
+
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columnas en celular */
-  gap: 1rem;
-}
-
-@media (min-width: 768px) {
-  .kpi-grid { grid-template-columns: repeat(4, 1fr); } /* 4 columnas en PC */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .kpi-card {
-  background: white;
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
   text-align: center;
 }
 
 .kpi-card h3 {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: var(--text-muted);
   margin-bottom: 0.5rem;
-  font-weight: 600;
-  text-transform: uppercase;
 }
 
-.kpi-value {
-  font-size: 2.2rem;
+.kpi-card .kpi-value {
+  font-size: 2.5rem;
   font-weight: 800;
-  color: var(--primary-color);
-}
-
-/* --- Gráficos --- */
-.charts-grid {
-  display: grid;
-  grid-template-columns: 1fr; /* 1 columna en celular */
-  gap: 1.5rem;
-}
-
-@media (min-width: 850px) {
-  .charts-grid { grid-template-columns: 1fr 1fr; } /* 2 columnas en PC */
-}
-
-.chart-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.chart-card h3 {
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem;
   color: var(--text-main);
 }
 
-.chart-wrapper {
-  height: 280px;
-  width: 100%;
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
 }
 
-/* --- Últimos Ingresos --- */
-.recent-books-section {
-  background: white;
+@media (min-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.chart-card {
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.recent-books-section h3 {
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-}
-
-.recent-books-list {
+  border-radius: 16px;
+  min-height: 400px;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
 }
 
-.recent-book-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background-color: var(--bg-color);
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-}
-
-.recent-book-info h4 { font-size: 1rem; margin-bottom: 0.25rem; }
-.recent-book-info p { font-size: 0.85rem; color: var(--text-muted); }
-
-.recent-book-category {
-  background-color: var(--secondary-color);
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
+.chart-card h3 {
+  font-size: 1.2rem;
+  color: var(--text-main);
+  margin-bottom: 1.5rem;
   text-align: center;
+}
+
+.chart-wrapper {
+  flex: 1;
+  min-height: 300px;
 }

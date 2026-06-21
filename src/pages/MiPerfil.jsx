@@ -2,7 +2,44 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { subscribeToUserActiveReservations, subscribeToUserHistoryReservations, returnReservation } from '../bookService.js';
+import { QRCodeSVG } from 'qrcode.react';
+import { useSwipeable } from 'react-swipeable';
+import { Settings, LogOut, RefreshCcw } from 'lucide-react';
 import './MiPerfil.css';
+
+const SwipeableReservation = ({ res, onReturn }) => {
+  const [swiped, setSwiped] = useState(false);
+
+  const handlers = useSwipeable({
+    onSwipedLeft: () => setSwiped(true),
+    onSwipedRight: () => setSwiped(false),
+    trackMouse: true,
+    preventDefaultTouchmoveEvent: true,
+  });
+
+  return (
+    <div className="swipe-wrapper" {...handlers}>
+      <div className={`swipe-content ${swiped ? 'swiped' : ''} glass-panel`}>
+        <div className="res-info-main">
+          <h4>{res.bookTitle}</h4>
+          <span className="due-date">Devolución: <strong>{res.returnDate}</strong></span>
+          <p className="swipe-hint">👈 Desliza para devolver</p>
+        </div>
+        <div className="qr-code-box">
+          <QRCodeSVG value={`RETIRAR:${res.id}`} size={50} level="L" includeMargin={false} />
+          <span>QR Retiro</span>
+        </div>
+      </div>
+      
+      <div className="swipe-action">
+        <button onClick={() => onReturn(res.id, res.bookId)} className="btn-swipe-return">
+          <RefreshCcw size={20} />
+          Devolver
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const MiPerfil = () => {
   const { currentUser, logout } = useAuth();
@@ -13,7 +50,6 @@ const MiPerfil = () => {
   const [historyReservations, setHistoryReservations] = useState([]);
   const [finesPaid, setFinesPaid] = useState(false);
 
-  // Helper para formato YYYY-MM-DD
   const getFormattedDate = (dateObj) => {
     const year = dateObj.getFullYear();
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -23,17 +59,11 @@ const MiPerfil = () => {
 
   const calcularMulta = () => {
     if (finesPaid) return 0;
-
     let totalMulta = 0;
     const todayStr = getFormattedDate(new Date());
-
-    // Multas por libros actualmente atrasados
     activeReservations.forEach(res => {
-      if (res.returnDate && todayStr > res.returnDate) {
-        totalMulta += 5000;
-      }
+      if (res.returnDate && todayStr > res.returnDate) totalMulta += 5000;
     });
-
     return totalMulta;
   };
 
@@ -65,103 +95,97 @@ const MiPerfil = () => {
 
   return (
     <div className="perfil-container">
-      <header className="perfil-header">
-        <h2>Mi Perfil 👤</h2>
-        <button className="settings-btn" onClick={() => setIsConfigOpen(true)} title="Configuración">
-          ⚙️
+      <header className="perfil-header glass-panel">
+        <div className="header-user-info">
+          <h2>Mi Biblioteca</h2>
+          <p>{currentUser?.email}</p>
+        </div>
+        <button className="settings-btn" onClick={() => setIsConfigOpen(true)}>
+          <Settings size={24} />
         </button>
       </header>
       
       <main className="perfil-main">
-        {/* KPIs de Cuenta */}
+        {/* KPIs */}
         <section className="perfil-stats">
-          <div className="stat-card success">
-            <h3>Créditos Disponibles</h3>
+          <div className="stat-card glass-panel success">
+            <h3>Créditos</h3>
             <p className="stat-value">{5 - activeReservations.length} <span className="stat-max">/ 5</span></p>
-            <p className="stat-desc">Puedes reservar 5 libros más</p>
           </div>
-          <div className="stat-card">
-            <h3>Libros Activos</h3>
+          <div className="stat-card glass-panel">
+            <h3>Activos</h3>
             <p className="stat-value">{activeReservations.length}</p>
-            <p className="stat-desc">En tu poder actualmente</p>
           </div>
-          <div className={`stat-card ${multasPendientes > 0 ? 'danger' : 'success'}`}>
-            <h3>Multas Pendientes</h3>
+          <div className={`stat-card glass-panel ${multasPendientes > 0 ? 'danger' : 'success'}`}>
+            <h3>Multas</h3>
             <p className="stat-value">${multasPendientes.toLocaleString('es-CL')}</p>
-            <p className="stat-desc">{multasPendientes > 0 ? 'Tienes multas por atrasos' : 'Al día sin deudas'}</p>
             {multasPendientes > 0 && (
-              <button 
-                onClick={() => {
-                  alert('¡Multa pagada exitosamente! Recuerda devolver tus libros atrasados.');
-                  setFinesPaid(true);
-                }}
-                style={{ marginTop: '10px', padding: '5px 10px', backgroundColor: 'var(--danger-color, #e74c3c)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 'bold' }}
-              >
-                Pagar multas
+              <button onClick={() => setFinesPaid(true)} className="pay-fine-btn">
+                Pagar Deuda
               </button>
             )}
           </div>
         </section>
 
+        {/* Reservas Activas (SWIPEABLES) */}
         <section className="perfil-section">
-          <h3 className="section-title">Mis Reservas Activas</h3>
+          <h3 className="section-title">Reservas Activas</h3>
           <div className="book-list">
             {activeReservations.length > 0 ? (
               activeReservations.map(res => (
-                <div key={res.id} className="perfil-book-card">
-                  <div className="book-info-basic">
-                    <h4>{res.bookTitle}</h4>
-                    <span className="due-date">Devolución: {res.returnDate}</span>
-                  </div>
-                  <button onClick={() => handleReturn(res.id, res.bookId)} className="return-btn">Devolver</button>
-                </div>
+                <SwipeableReservation key={res.id} res={res} onReturn={handleReturn} />
               ))
             ) : (
-              <p className="empty-text">No tienes libros reservados en este momento.</p>
+              <div className="empty-state glass-panel">
+                <span style={{ fontSize: '3rem', display: 'block', marginBottom: '1rem' }}>📚</span>
+                <p>No tienes libros en préstamo.</p>
+              </div>
             )}
           </div>
         </section>
 
+        {/* Historial */}
         <section className="perfil-section">
-          <h3 className="section-title">Historial de Devoluciones</h3>
+          <h3 className="section-title">Historial</h3>
           <div className="book-list">
             {historyReservations.length > 0 ? (
               [...historyReservations]
                 .sort((a, b) => new Date(b.returnedAt || 0) - new Date(a.returnedAt || 0))
+                .slice(0, 10) // Mostrar solo los últimos 10 para no saturar móvil
                 .map(res => (
-                <div key={res.id} className="perfil-book-card history-card">
-                  <div className="book-info-basic">
+                <div key={res.id} className="history-card glass-panel">
+                  <div className="history-info">
                     <h4>{res.bookTitle}</h4>
-                    <span className="history-date">Entregado el: {res.returnedAt ? new Date(res.returnedAt).toLocaleDateString() : 'Desconocido'}</span>
+                    <span>Devuelto: {res.returnedAt ? new Date(res.returnedAt).toLocaleDateString() : 'Ok'}</span>
                   </div>
-                  <span className="history-status-badge returned">Devuelto</span>
+                  <span className="badge-returned">✓</span>
                 </div>
               ))
             ) : (
-              <p className="empty-text">Aún no hay registros en tu historial.</p>
+              <div className="empty-state glass-panel">
+                <p>Aún no hay registros en tu historial.</p>
+              </div>
             )}
           </div>
         </section>
       </main>
 
-      {/* Modal de Configuración */}
+      {/* Modal Config */}
       {isConfigOpen && (
         <div className="config-modal-overlay">
-          <div className="config-modal-content">
-            <h3 style={{ color: 'var(--text-main)', marginBottom: '1.5rem' }}>Opciones de la Cuenta</h3>
-            
-            <div style={{ marginBottom: '2rem', textAlign: 'left', backgroundColor: 'var(--bg-color)', padding: '1rem', borderRadius: '8px' }}>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.25rem', fontWeight: 'bold' }}>USUARIO AUTENTICADO:</p>
-              <p style={{ color: 'var(--text-main)', fontSize: '1rem', wordBreak: 'break-all' }}>{currentUser?.email}</p>
+          <div className="config-modal-content glass-panel">
+            <h3>Configuración</h3>
+            <div className="config-user-box">
+              <p className="label">CUENTA CONECTADA</p>
+              <p className="email">{currentUser?.email}</p>
             </div>
-
-            {error && <p className="error-message" style={{ marginBottom: '1rem' }}>{error}</p>}
+            {error && <p className="error-message">{error}</p>}
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+            <div className="config-actions">
               <button onClick={handleLogout} className="logout-btn">
-                Cerrar Sesión
+                <LogOut size={18} /> Cerrar Sesión
               </button>
-              <button onClick={() => setIsConfigOpen(false)} className="save-config-btn" style={{ marginTop: 0, backgroundColor: 'var(--secondary-color)' }}>
+              <button onClick={() => setIsConfigOpen(false)} className="close-config-btn">
                 Volver
               </button>
             </div>

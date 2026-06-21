@@ -1,29 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { Home, Search, PlusCircle, User, Moon, Sun } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = () => {
+  const [isDark, setIsDark] = useState(() => {
+    return localStorage.getItem('theme') === 'dark';
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
   return (
     <nav className="bottom-navbar">
       <NavLink to="/" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-        <span className="nav-icon">🏠</span>
+        <Home className="nav-icon" />
         <span className="nav-label">Inicio</span>
       </NavLink>
       
       <NavLink to="/busqueda" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-        <span className="nav-icon">🔍</span>
+        <Search className="nav-icon" />
         <span className="nav-label">Buscar</span>
       </NavLink>
       
       <NavLink to="/bibliotecario" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-        <span className="nav-icon">➕</span>
+        <PlusCircle className="nav-icon" />
         <span className="nav-label">Añadir</span>
       </NavLink>
 
       <NavLink to="/perfil" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-        <span className="nav-icon">👤</span>
+        <User className="nav-icon" />
         <span className="nav-label">Perfil</span>
       </NavLink>
+
+      <button className="nav-item theme-toggle" onClick={() => setIsDark(!isDark)}>
+        {isDark ? <Sun className="nav-icon" /> : <Moon className="nav-icon" />}
+        <span className="nav-label">{isDark ? 'Claro' : 'Oscuro'}</span>
+      </button>
     </nav>
   );
 };

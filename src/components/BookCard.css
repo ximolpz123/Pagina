@@ -1,15 +1,16 @@
 .book-card {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  background-color: var(--card-bg);
+  border-radius: 16px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid rgba(150, 150, 150, 0.1);
 }
 
 .book-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
 }
 
 .cover-container {
@@ -17,12 +18,48 @@
   height: 250px;
   overflow: hidden;
   background-color: var(--secondary-color);
+  position: relative;
 }
 
 .book-cover {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.cover-container:hover .book-cover {
+  transform: scale(1.05);
+}
+
+.favorite-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  border: none;
+  border-radius: 50%;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.favorite-btn:hover {
+  transform: scale(1.15);
+}
+
+.favorite-btn.active {
+  animation: heartPulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes heartPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
 }
 
 .book-info {
@@ -35,12 +72,23 @@
 .book-title {
   font-size: 1.25rem;
   margin-bottom: 0.25rem;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .book-author {
   color: var(--text-muted);
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   font-size: 0.9rem;
+}
+
+.book-rating {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  letter-spacing: 2px;
+  color: #f59e0b;
 }
 
 .status-badge {
@@ -54,10 +102,16 @@
 }
 
 .status-badge.available { background-color: var(--primary-color); color: white; }
-.status-badge.unavailable { background-color: #fee2e2; color: var(--danger-color); }
+.status-badge.unavailable { background-color: rgba(220, 38, 38, 0.1); color: var(--danger-color); }
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+}
 
 .reserve-btn {
-  margin-top: auto;
+  flex: 2;
   background-color: var(--primary-color);
   color: white;
   border: none;
@@ -67,6 +121,27 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
+}
+
+.reserve-btn-express {
+  flex: 1;
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  padding: 0.8rem 0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reserve-btn-express:hover {
+  background-color: #d97706;
+  transform: translateY(-2px);
 }
 
 .reserve-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
@@ -87,15 +162,47 @@
 
 .request-stock-btn:hover { background-color: var(--secondary-color); }
 
-.success-modal {
-  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-  background-color: var(--success-color); color: white;
-  padding: 1rem; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-  z-index: 50; animation: slideUp 0.3s ease-out; text-align: center; width: 90%; max-width: 350px;
+.success-modal-top {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--card-bg);
+  border-left: 5px solid var(--success-color, #10b981);
+  color: var(--text-main, #333);
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  width: 90%;
+  max-width: 400px;
 }
 
-.modal-content span { font-weight: bold; display: block; margin-bottom: 0.25rem; }
-@keyframes slideUp { from { bottom: -50px; opacity: 0; } to { bottom: 20px; opacity: 1; } }
+.success-modal-icon {
+  font-size: 2rem;
+}
+
+.success-modal-text {
+  text-align: left;
+}
+
+.success-modal-text span {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--success-color, #10b981);
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.success-modal-text p {
+  font-size: 0.9rem;
+  margin: 0;
+  color: var(--text-muted);
+}
 
 .request-stock-btn:disabled {
   background-color: #cbd5e1;
@@ -108,7 +215,7 @@
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: white;
+  background-color: var(--card-bg);
   border-left: 5px solid var(--tertiary-color, #f39c12);
   color: var(--text-main, #333);
   padding: 1rem 1.5rem;
@@ -123,27 +230,10 @@
   max-width: 400px;
 }
 
-.request-modal-icon {
-  font-size: 2rem;
-}
-
-.request-modal-text {
-  text-align: left;
-}
-
-.request-modal-text span {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--tertiary-color, #f39c12);
-  display: block;
-  margin-bottom: 0.2rem;
-}
-
-.request-modal-text p {
-  font-size: 0.9rem;
-  margin: 0;
-  color: #475569;
-}
+.request-modal-icon { font-size: 2rem; }
+.request-modal-text { text-align: left; }
+.request-modal-text span { font-weight: 700; font-size: 1.1rem; color: var(--tertiary-color, #f39c12); display: block; margin-bottom: 0.2rem; }
+.request-modal-text p { font-size: 0.9rem; margin: 0; color: var(--text-muted); }
 
 @keyframes slideDown {
   from { top: -50px; opacity: 0; }
@@ -153,44 +243,28 @@
 /* Reservation Modal */
 .reservation-modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);
   display: flex; justify-content: center; align-items: center; z-index: 100;
 }
 
 .reservation-modal-content {
-  background: white; padding: 1.5rem; border-radius: 12px; width: 90%; max-width: 350px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: left;
+  background: var(--card-bg); padding: 1.5rem; border-radius: 12px; width: 90%; max-width: 350px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: left; border: 1px solid rgba(150, 150, 150, 0.1);
 }
 
 .reservation-modal-content h3 { color: var(--text-main); margin-bottom: 1rem; font-size: 1.2rem; }
 
 .date-group { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1rem; }
-.date-group label { font-size: 0.85rem; font-weight: 600; color: #475569; }
-.date-group input { padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; }
+.date-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+.date-group input { padding: 0.6rem; border: 1px solid var(--tertiary-color); background: transparent; color: var(--text-main); border-radius: 8px; font-family: inherit; }
 
 .modal-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
-.cancel-btn { flex: 1; padding: 0.6rem; background: var(--secondary-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.cancel-btn { flex: 1; padding: 0.6rem; background: var(--secondary-color); color: var(--text-main); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 .confirm-btn { flex: 1; padding: 0.6rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
 .confirm-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
 
-/* Estilos para el Modal de Advertencia */
-.reservation-modal-content.warning-modal {
-  text-align: center;
-}
-
-.warning-icon {
-  font-size: 3rem;
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.reservation-modal-content.warning-modal h3 {
-  color: var(--danger-color);
-}
-
-.reservation-modal-content.warning-modal p {
-  color: var(--text-main);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin: 0.5rem 0 1.5rem 0;
-}
+/* Warning Modal */
+.reservation-modal-content.warning-modal { text-align: center; }
+.warning-icon { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+.reservation-modal-content.warning-modal h3 { color: var(--danger-color); }
+.reservation-modal-content.warning-modal p { color: var(--text-main); font-size: 0.95rem; line-height: 1.5; margin: 0.5rem 0 1.5rem 0; }

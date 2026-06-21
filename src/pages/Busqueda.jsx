@@ -1,8 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import BookCard from '../components/BookCard.jsx';
 import { subscribeToBooks, subscribeToUserActiveReservations } from '../bookService.js';
+import { Mic, ScanBarcode, Search as SearchIcon, SlidersHorizontal } from 'lucide-react';
 import './Busqueda.css';
 import { useAuth } from '../context/AuthContext';
+
+// --- UTILIDAD PARA FUZZY SEARCH ---
+const levenshteinDistance = (s1, s2) => {
+  const m = s1.length, n = s2.length;
+  const dp = Array.from({length: m + 1}, () => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+    }
+  }
+  return dp[m][n];
+};
+
+const isFuzzyMatch = (query, text) => {
+  if (!query) return true;
+  if (!text) return false;
+  const qWords = query.toLowerCase().trim().split(/\s+/);
+  const tWords = text.toLowerCase().trim().split(/\s+/);
+  return qWords.every(qw => 
+    tWords.some(tw => {
+      if (tw.includes(qw)) return true;
+      const dist = levenshteinDistance(qw, tw);
+      return dist <= 2 && qw.length > 3; // Tolerar 2 errores solo en palabras largas
+    })
+  );
+};
 
 const Busqueda = () => {
   const [books, setBooks] = useState([]);
@@ -10,17 +40,23 @@ const Busqueda = () => {
   const [reservasActivas, setReservasActivas] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Estados para los nuevos filtros
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filterCategory, setFilterCategory] = useState('Todas');
-  const [filterAvailability, setFilterAvailability] = useState('Todos');
-  const [sortOrder, setSortOrder] = useState('Relevancia');
-
+  const [minRating, setMinRating] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
+  
   const [isLoading, setIsLoading] = useState(true);
+
+  const MAIN_CATEGORIES = ['Todas', 'Informática', 'Medicina', 'Literatura', 'Ciencia Ficcion', 'Romance'];
 
   useEffect(() => {
     const unsubscribeBooks = subscribeToBooks((data) => {
-      setBooks(data);
+      // Agregamos rating ficticio si no existe para la demo
+      const booksWithRating = data.map(b => ({
+        ...b,
+        rating: b.rating || ((b.title.length % 3) + 3) // Genera 3, 4 o 5 de forma determinista
+      }));
+      setBooks(booksWithRating);
       setIsLoading(false);
     });
 
@@ -32,153 +68,155 @@ const Busqueda = () => {
     };
   }, []);
 
-  // Lógica Predictiva: Generar sugerencias basadas en lo que el usuario escribe
+  const handleVoiceSearch = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'es-ES';
+      recognition.start();
+      recognition.onresult = (e) => {
+        setSearchQuery(e.results[0][0].transcript);
+      };
+    } else {
+      alert("Tu navegador no soporta búsqueda por voz.");
+    }
+  };
+
+  const handleScannerClick = () => {
+    const isbn = prompt("Simulador de Escáner:\nApunta tu cámara o ingresa un ISBN manualmente:");
+    if (isbn) setSearchQuery(isbn);
+  };
+
   const getSuggestions = () => {
     if (!searchQuery.trim()) return [];
     const query = searchQuery.toLowerCase();
-    const optionsMap = new Map(); // Usamos Map para guardar el texto y su categoría
+    const optionsMap = new Map(); 
     
     books.forEach(book => {
-      if (book.title && book.title.toLowerCase().includes(query)) {
+      if (isFuzzyMatch(query, book.title)) {
         if (!optionsMap.has(book.title)) optionsMap.set(book.title, book.category);
       }
-      if (book.author && book.author.toLowerCase().includes(query)) {
-        if (!optionsMap.has(book.author)) optionsMap.set(book.author, book.category);
-      }
     });
-    return Array.from(optionsMap, ([text, category]) => ({ text, category })).slice(0, 5); // Máximo 5 sugerencias
+    return Array.from(optionsMap, ([text, category]) => ({ text, category })).slice(0, 5);
   };
 
   const suggestions = getSuggestions();
-  const handleSuggestionClick = (suggestion) => {
-    setSearchQuery(suggestion);
-    setShowSuggestions(false);
-  };
-
-  // Asignar un icono visual basado en la categoría
-  const getCategoryIcon = (category) => {
-    if (!category) return '📚';
-    const cat = category.toLowerCase();
-    if (cat.includes('informática') || cat.includes('programación') || cat.includes('informatica')) return '💻';
-    if (cat.includes('ciencias')) return '🧪';
-    if (cat.includes('medicina')) return '🩺';
-    if (cat.includes('literatura')) return '📖';
-    if (cat.includes('ciencia ficcion')) return '🚀';
-    if (cat.includes('romance')) return '❤️';
-    if (cat.includes('fantasia')) return '🧙';
-    if (cat.includes('acción')) return '💥';
-    if (cat.includes('comics')) return '🦸';
-    if (cat.includes('thriller')) return '🔪';
-    return '📚'; // Icono por defecto para cualquier otra categoría
-  };
-
+  
   const filteredBooks = books.filter(book => {
-    // 1. Filtro por Texto (Buscador general)
-    const title = book.title || '';
-    const author = book.author || '';
-    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          author.toLowerCase().includes(searchQuery.toLowerCase());
+    // 1. Fuzzy Search por Título, Autor o ISBN (simulado si meten un número largo)
+    const textToSearch = `${book.title} ${book.author} ${book.isbn || ''}`;
+    const matchesSearch = isFuzzyMatch(searchQuery, textToSearch);
     
-    // 2. Filtro por Categoría
+    // 2. Filtro de Categoría por Chips
     let matchesCategory = true;
     if (filterCategory !== 'Todas') {
-      const category = book.category === 'Informática y Programación' ? 'Informática' : (book.category || 'General');
+      const category = book.category || 'General';
       matchesCategory = category.includes(filterCategory) || filterCategory.includes(category);
     }
 
-    // 3. Filtro por Disponibilidad
-    let matchesAvailability = true;
-    const stockActual = book.stock !== undefined ? book.stock : (book.available ? 1 : 0);
-    if (filterAvailability === 'Disponibles') matchesAvailability = stockActual > 0;
-    if (filterAvailability === 'Agotados') matchesAvailability = stockActual === 0;
+    // 3. Filtro visual de Rating (Estrellas)
+    const matchesRating = book.rating >= minRating;
 
-    return matchesSearch && matchesCategory && matchesAvailability;
-  }).sort((a, b) => {
-    // 4. Ordenamiento
-    if (sortOrder === 'A-Z') return (a.title || '').localeCompare(b.title || '');
-    if (sortOrder === 'Z-A') return (b.title || '').localeCompare(a.title || '');
-    return 0; // Orden por defecto (Relevancia/Recientes)
+    return matchesSearch && matchesCategory && matchesRating;
   });
 
   return (
     <div className="busqueda-container">
-      <header className="busqueda-header">
-        <h2>Búsqueda Avanzada 🔍</h2>
+      <header className="busqueda-header glass-panel">
+        <h2>Busca tu libro favorito 🔍</h2>
+        <p>Encuentra por título, autor o escanea el ISBN</p>
       </header>
+      
       <main className="busqueda-main">
         <div className="search-section">
-          {/* Contenedor relativo para posicionar la ventanita de autocompletado */}
-          <div className="search-input-wrapper">
+          
+          {/* BARRA DE BÚSQUEDA MODERNA */}
+          <div className="search-bar-modern">
+            <SearchIcon className="search-icon-left" />
             <input 
               type="search" 
-              className="global-search-bar" 
-              placeholder="Buscar libros, autores..." 
+              className="global-search-input" 
+              placeholder="Ej: 'Gari poter', ISBN, o Título..." 
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setShowSuggestions(true);
               }}
               onFocus={() => setShowSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} // Delay para permitir el clic
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             />
-            
-            {/* Ventanita de sugerencias */}
+            <button className="icon-btn" onClick={handleVoiceSearch} title="Búsqueda por Voz">
+              <Mic />
+            </button>
+            <button className="icon-btn" onClick={handleScannerClick} title="Escanear ISBN">
+              <ScanBarcode />
+            </button>
+            <button className={`icon-btn toggle-filters ${showFilters ? 'active' : ''}`} onClick={() => setShowFilters(!showFilters)}>
+              <SlidersHorizontal />
+            </button>
+
+            {/* SUGERENCIAS */}
             {showSuggestions && suggestions.length > 0 && (
-              <ul className="autocomplete-dropdown">
+              <ul className="autocomplete-dropdown glass-panel">
                 {suggestions.map((suggestion, index) => (
-                  <li key={index} onMouseDown={() => handleSuggestionClick(suggestion.text)}>
-                    <span className="category-icon">{getCategoryIcon(suggestion.category)}</span> {suggestion.text}
+                  <li key={index} onMouseDown={() => { setSearchQuery(suggestion.text); setShowSuggestions(false); }}>
+                    <SearchIcon size={14} /> {suggestion.text}
                   </li>
                 ))}
               </ul>
             )}
           </div>
           
-          <div className="filters-section">
-            <div className="filter-group">
-              <label>Asignatura / Categoría</label>
-              <select className="filter-select" value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
-                <option value="Todas">Todas las categorías</option>
-                <option value="Informática">Informática y Programación</option>
-                <option value="Ciencias Básicas">Ciencias Básicas</option>
-                <option value="Medicina">Medicina</option>
-                <option value="Literatura">Literatura</option>
-                <option value="Ciencia Ficcion">Ciencia Ficción</option>
-                <option value="Romance">Romance</option>
-                <option value="Fantasia">Fantasía</option>
-                <option value="Acción">Acción</option>
-                <option value="Comics">Comics</option>
-                <option value="Thriller">Thriller</option>
-              </select>
+          {/* FILTROS VISUALES AVANZADOS (CHIPS Y SLIDERS) */}
+          <div className={`advanced-filters ${showFilters ? 'open' : ''}`}>
+            
+            <div className="filter-block">
+              <span className="filter-label">Categorías Rápidas</span>
+              <div className="chips-container">
+                {MAIN_CATEGORIES.map(cat => (
+                  <button 
+                    key={cat} 
+                    className={`chip ${filterCategory === cat ? 'active' : ''}`}
+                    onClick={() => setFilterCategory(cat)}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="filter-group">
-              <label>Disponibilidad</label>
-              <select className="filter-select" value={filterAvailability} onChange={(e) => setFilterAvailability(e.target.value)}>
-                <option value="Todos">Todos</option>
-                <option value="Disponibles">Disponibles</option>
-                <option value="Agotados">Agotados</option>
-              </select>
+            <div className="filter-block">
+              <span className="filter-label">Calificación Mínima: {minRating > 0 ? `${minRating} ⭐` : 'Cualquiera'}</span>
+              <div className="slider-container">
+                <input 
+                  type="range" 
+                  min="0" max="5" 
+                  value={minRating} 
+                  onChange={(e) => setMinRating(parseInt(e.target.value))}
+                  className="rating-slider"
+                />
+                <div className="slider-marks">
+                  <span>Todas</span>
+                  <span>⭐⭐⭐⭐⭐</span>
+                </div>
+              </div>
             </div>
 
-            <div className="filter-group">
-              <label>Ordenar por</label>
-              <select className="filter-select" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-                <option value="Relevancia">Relevancia</option>
-                <option value="A-Z">Alfabético (A-Z)</option>
-                <option value="Z-A">Alfabético (Z-A)</option>
-              </select>
-            </div>
           </div>
         </div>
+        
         <section className="books-grid">
           {isLoading ? (
-            <p className="loading-text">Buscando en el catálogo...</p>
+            <p className="loading-text">Cargando la magia...</p>
           ) : (
             filteredBooks.length > 0 ? (
               filteredBooks.map((book) => <BookCard key={book.id} book={book} creditosDisponibles={5 - reservasActivas.length} />)
             ) : (
-              <p className="loading-text">No se encontraron libros 🔎</p>
+              <div className="no-results glass-panel">
+                <span className="no-results-icon">👻</span>
+                <h3>Oops... No encontramos nada</h3>
+                <p>Intenta buscar por voz o relajando los filtros.</p>
+              </div>
             )
           )}
         </section>

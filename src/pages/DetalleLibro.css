@@ -1,198 +1,87 @@
 .detalle-container {
-  padding: 1.5rem 1rem;
-  padding-bottom: 6rem;
-  max-width: 900px;
+  padding: 1.5rem;
+  max-width: 1000px;
   margin: 0 auto;
   min-height: 100vh;
+  padding-bottom: 80px;
 }
 
 .back-btn {
-  background: none;
+  background: transparent;
   border: none;
-  color: var(--primary-color);
-  font-weight: 700;
-  font-size: 1.1rem;
+  color: var(--text-muted);
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  margin-bottom: 1rem;
+  transition: color 0.2s;
 }
+
+.back-btn:hover { color: var(--primary-color); }
 
 .detalle-content {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  background: white;
-  padding: 1.5rem;
+  padding: 2rem;
   border-radius: 16px;
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
 }
 
 @media (min-width: 768px) {
-  .detalle-content {
-    flex-direction: row;
-    padding: 2rem;
-  }
+  .detalle-content { flex-direction: row; align-items: flex-start; }
 }
 
 .detalle-cover-wrapper {
-  flex: 0 0 250px;
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  align-self: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
-.detalle-cover {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
+.detalle-cover { width: 100%; display: block; object-fit: cover; }
+
+.detalle-favorite-btn {
+  position: absolute; top: 15px; right: 15px;
+  background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px);
+  border: none; border-radius: 50%; padding: 10px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.detalle-favorite-btn:hover { transform: scale(1.15); }
+.detalle-favorite-btn.active { animation: heartPulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+.detalle-info { flex: 1; }
+
+.detalle-title { font-size: 2.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem; }
+.detalle-author { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+.detalle-rating { font-size: 1.2rem; color: #f59e0b; margin-bottom: 1.5rem; letter-spacing: 2px; }
+
+.detalle-synopsis { margin-bottom: 2rem; }
+.detalle-synopsis h3 { color: var(--text-main); margin-bottom: 0.5rem; }
+.detalle-synopsis p { color: var(--text-muted); line-height: 1.6; }
+
+.detalle-action-buttons {
+  display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
 }
 
-.detalle-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+.reserve-btn-express, .reserve-btn-large {
+  flex: 1; min-width: 200px;
+  padding: 1rem; border-radius: 12px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.2s;
 }
 
-.detalle-title {
-  font-size: 1.8rem;
-  color: var(--text-main);
-  margin-bottom: 0.5rem;
-  line-height: 1.2;
-}
+.reserve-btn-express { background: #f59e0b; color: white; }
+.reserve-btn-express:hover { background: #d97706; transform: translateY(-2px); }
 
-.detalle-author {
-  font-size: 1.1rem;
-  color: var(--text-muted);
-  margin-bottom: 1rem;
-}
+.reserve-btn-large { background: var(--primary-color); color: white; }
+.reserve-btn-large:hover { background: var(--primary-hover); transform: translateY(-2px); }
 
-.detalle-synopsis {
-  margin: 1.5rem 0;
-  flex: 1;
-}
-
-.detalle-synopsis h3 {
-  font-size: 1.1rem;
-  margin-bottom: 0.8rem;
-  color: var(--text-main);
-}
-
-.detalle-synopsis p {
-  line-height: 1.6;
-  color: #475569;
-  font-size: 0.95rem;
-}
-
-.reserve-btn-large {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  margin-top: 1rem;
-}
-
-.reserve-btn-large:hover:not(:disabled) { background-color: var(--primary-hover); }
-.reserve-btn-large:disabled { background-color: #94a3b8; cursor: not-allowed; }
-.loading-state, .error-state { text-align: center; padding: 4rem 1rem; font-size: 1.2rem; color: var(--text-muted); }
-
-.request-stock-btn-large {
-  background-color: var(--tertiary-color);
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  margin-top: 1rem;
-}
-.request-stock-btn-large:hover { background-color: var(--secondary-color); }
-
-/* Estilos para el Control de Stock */
 .admin-section {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px dashed #cbd5e1;
+  margin-top: 3rem; padding: 1.5rem; border-radius: 12px;
 }
-
-.admin-section h4 {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
-}
-
-.stock-control {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.stock-control input {
-  padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; width: 80px; font-size: 1rem; outline: none;
-}
-
-.stock-control button {
-  background-color: #475569; color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background-color 0.2s;
-}
-
-.stock-control button:hover:not(:disabled) {
-  background-color: #334155;
-}
-
-.stock-control button:disabled { opacity: 0.7; cursor: not-allowed; }
-
-/* Reservation Modal */
-.reservation-modal-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(2px);
-  display: flex; justify-content: center; align-items: center; z-index: 100;
-}
-
-.reservation-modal-content {
-  background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-.reservation-modal-content h3 { color: var(--text-main); margin-bottom: 0.5rem; }
-.reservation-modal-content p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
-
-.date-group { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1rem; }
-.date-group label { font-size: 0.85rem; font-weight: 600; color: #475569; }
-.date-group input { padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; }
-
-.modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
-.cancel-btn { flex: 1; padding: 0.8rem; background: var(--secondary-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-.confirm-btn { flex: 1; padding: 0.8rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
-.confirm-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
-
-/* Estilos para el Modal de Advertencia */
-.reservation-modal-content.warning-modal {
-  text-align: center;
-}
-
-.warning-icon {
-  font-size: 3rem;
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.reservation-modal-content.warning-modal h3 {
-  color: var(--danger-color);
-}
-
-.reservation-modal-content.warning-modal p {
-  color: var(--text-main);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin: 0.5rem 0 1.5rem 0;
-}
+.admin-section h4 { color: var(--danger-color); margin-bottom: 1rem; }
+.stock-control { display: flex; gap: 1rem; }
+.stock-control input { width: 80px; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--tertiary-color); background: transparent; color: var(--text-main); }
+.stock-control button { padding: 0.5rem 1rem; border-radius: 8px; border: none; background: var(--secondary-color); color: var(--text-main); font-weight: 600; cursor: pointer; }
