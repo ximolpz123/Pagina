@@ -125,8 +125,8 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <header className="dashboard-header glass-panel" style={{ position: 'relative' }}>
         <div>
-          <h1>Bienvenido de nuevo, {currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'Lector'} 👋</h1>
-          <p>¿Qué te gustaría leer hoy, {currentUser?.email}?</p>
+          <h1>Bienvenido, {currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'Lector'} 👋</h1>
+          <p>Aquí encontrarás tus libros favoritos o de estudio.</p>
         </div>
         <button className="about-btn" onClick={() => setShowAboutModal(true)}>
           📖 ¿Quiénes somos? / Guía
@@ -222,26 +222,32 @@ const Dashboard = () => {
               <div className="about-card">
                 <h3>🎯 ¿Cómo funciona?</h3>
                 <ol>
-                  <li><strong>Busca:</strong> Usa nuestro buscador inteligente por voz, título o desliza los filtros.</li>
-                  <li><strong>Reserva:</strong> Usa el botón "⚡ Reserva Rápida" (1-Click) para apartar el libro por 7 días.</li>
-                  <li><strong>Retira:</strong> Ve a "Mi Perfil", muestra el Código QR al bibliotecario y llévate tu libro.</li>
+                  <li>
+                    <strong>Busca:</strong> Usa nuestro buscador inteligente por voz, escáner de ISBN <em>(el código de barras único que identifica a cada libro)</em> o filtros dinámicos.
+                  </li>
+                  <li>
+                    <strong>Reserva:</strong> Usa el botón de "Reserva" (a 1 Click) para apartar el libro por 7 días.
+                  </li>
+                  <li><strong>Retira:</strong> Ve a "Mi Perfil", muestra tu Código QR al bibliotecario y llévate tu libro.</li>
                 </ol>
+              </div>
+
+              <div className="about-card">
+                <h3>⭐ Comunidad y Perfil</h3>
+                <ul>
+                  <li><strong>Personaliza:</strong> En Configuración (Mi Perfil) puedes agregar tu foto y carrera.</li>
+                  <li><strong>Opina:</strong> Al devolver un libro, podrás calificarlo y dejar una reseña para otros lectores.</li>
+                  <li><strong>Favoritos:</strong> Dale al corazón (❤️) para guardar libros en tu carrusel personal.</li>
+                </ul>
               </div>
 
               <div className="about-card">
                 <h3>⚖️ Reglas y Límites</h3>
                 <ul>
-                  <li>Tienes un límite máximo de <strong>5 libros</strong> en préstamo simultáneo.</li>
-                  <li>El tiempo de préstamo estándar es de <strong>1 semana (7 días)</strong>.</li>
-                  <li>⚠️ <strong>Multas:</strong> Se aplicará una multa de <strong>$5.000 CLP</strong> por cada libro atrasado.</li>
+                  <li>Límite máximo de <strong>5 libros</strong> en préstamo simultáneo.</li>
+                  <li>Tiempo de préstamo estándar de <strong>1 semana (7 días)</strong>.</li>
+                  <li>⚠️ <strong>Multas:</strong> $5.000 CLP por cada libro atrasado.</li>
                 </ul>
-              </div>
-
-              <div className="about-card">
-                <h3>✨ Tips Rápidos</h3>
-                <p>
-                  Si te gusta un libro pero no quieres reservarlo aún, dale al corazón (❤️) para guardarlo en tu carrusel personal de Favoritos. Si estás en celular, puedes deslizar tus reservas hacia la izquierda para devolverlas rápidamente.
-                </p>
               </div>
             </div>
 

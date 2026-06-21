@@ -10,7 +10,7 @@ import { auth } from '../firebase';
 import { updateProfile } from 'firebase/auth';
 import './MiPerfil.css';
 
-const SwipeableReservation = ({ res, onReturn }) => {
+const SwipeableReservation = ({ res, onReturn, onExpandQR }) => {
   const [swiped, setSwiped] = useState(false);
 
   const handlers = useSwipeable({
@@ -33,7 +33,7 @@ const SwipeableReservation = ({ res, onReturn }) => {
           <span className="due-date">Devolución: <strong>{res.returnDate}</strong></span>
           <p className="swipe-hint">👈 Desliza para devolver</p>
         </div>
-        <div className="qr-code-box">
+        <div className="qr-code-box" onClick={() => onExpandQR(res)} style={{ cursor: 'pointer' }} title="Ampliar Código QR">
           <QRCodeSVG value={`RETIRAR:${res.id}`} size={50} level="L" includeMargin={false} />
           <span>QR Retiro</span>
         </div>
@@ -60,6 +60,8 @@ const MiPerfil = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editName, setEditName] = useState('');
   const [editPhoto, setEditPhoto] = useState('');
+  const [editCareer, setEditCareer] = useState('');
+  const [userCareer, setUserCareer] = useState('Estudiante');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   
   // Reseñas
@@ -68,6 +70,9 @@ const MiPerfil = () => {
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  
+  // QR Expandido
+  const [expandedQRRes, setExpandedQRRes] = useState(null);
 
   useEffect(() => {
     // Para evitar advertencias de set-state-in-effect si es síncrono, lo manejamos limpiamente
@@ -75,6 +80,13 @@ const MiPerfil = () => {
       setTimeout(() => {
         setEditName(currentUser.displayName || '');
         setEditPhoto(currentUser.photoURL || '');
+        const savedCareer = localStorage.getItem(`career_${currentUser.email}`);
+        if (savedCareer) {
+          setUserCareer(savedCareer);
+          setEditCareer(savedCareer);
+        } else {
+          setEditCareer('Estudiante');
+        }
       }, 0);
     }
   }, [currentUser]);
@@ -156,6 +168,8 @@ const MiPerfil = () => {
         displayName: editName,
         photoURL: editPhoto
       });
+      localStorage.setItem(`career_${currentUser.email}`, editCareer);
+      setUserCareer(editCareer);
       // Forzar recarga ligera para que los componentes lean los nuevos datos del Auth
       toast.success('Perfil actualizado correctamente', { id: tId });
       setTimeout(() => window.location.reload(), 1000);
@@ -178,7 +192,7 @@ const MiPerfil = () => {
           )}
           <div>
             <h2>{currentUser?.displayName || 'Mi Perfil'}</h2>
-            <p>{currentUser?.email}</p>
+            <p>{userCareer}</p>
           </div>
         </div>
         <button className="settings-btn" onClick={() => setIsConfigOpen(true)}>
@@ -214,7 +228,7 @@ const MiPerfil = () => {
           <div className="book-list">
             {activeReservations.length > 0 ? (
               activeReservations.map(res => (
-                <SwipeableReservation key={res.id} res={res} onReturn={handleReturn} />
+                <SwipeableReservation key={res.id} res={res} onReturn={handleReturn} onExpandQR={setExpandedQRRes} />
               ))
             ) : (
               <div className="empty-state glass-panel">
@@ -262,6 +276,7 @@ const MiPerfil = () => {
               {!isEditingProfile ? (
                 <div className="profile-view-box">
                   <p><strong>Nombre:</strong> {currentUser?.displayName || 'No establecido'}</p>
+                  <p><strong>Carrera:</strong> {userCareer}</p>
                   <p><strong>Email:</strong> {currentUser?.email}</p>
                   <button className="btn-edit-profile" onClick={() => setIsEditingProfile(true)}>
                     <Edit2 size={16} /> Editar Perfil
@@ -270,7 +285,10 @@ const MiPerfil = () => {
               ) : (
                 <form className="profile-edit-form" onSubmit={handleUpdateProfile}>
                   <label>Nombre a mostrar</label>
-                  <input type="text" value={editName} onChange={e => setEditName(e.target.value)} placeholder="Ej: Tomás" />
+                  <input type="text" value={editName} onChange={e => setEditName(e.target.value)} placeholder="Ej: Tomás" required />
+                  
+                  <label>Carrera / Especialidad</label>
+                  <input type="text" value={editCareer} onChange={e => setEditCareer(e.target.value)} placeholder="Ej: Ing. Informática" required />
                   
                   <label>URL de tu foto de perfil</label>
                   <input type="url" value={editPhoto} onChange={e => setEditPhoto(e.target.value)} placeholder="https://..." />
@@ -336,6 +354,28 @@ const MiPerfil = () => {
               </button>
               <button onClick={() => setReviewModalOpen(false)} className="btn-cancel-profile">
                 Omitir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal QR Expandido */}
+      {expandedQRRes && (
+        <div className="config-modal-overlay" onClick={() => setExpandedQRRes(null)}>
+          <div className="config-modal-content glass-panel" style={{ textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ marginBottom: '0.5rem' }}>Código de Retiro</h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+              Muestra este código al bibliotecario para retirar <br/><strong>"{expandedQRRes.bookTitle}"</strong>
+            </p>
+            
+            <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', display: 'inline-block', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+              <QRCodeSVG value={`RETIRAR:${expandedQRRes.id}`} size={220} level="L" includeMargin={false} />
+            </div>
+
+            <div style={{ marginTop: '2rem' }}>
+              <button onClick={() => setExpandedQRRes(null)} className="btn-save-profile" style={{ width: '100%' }}>
+                Cerrar
               </button>
             </div>
           </div>

@@ -43,7 +43,7 @@ const Busqueda = () => {
   
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filterCategory, setFilterCategory] = useState('Todas');
-  const [minRating, setMinRating] = useState(0);
+  const [maxRating, setMaxRating] = useState(5);
   const [showFilters, setShowFilters] = useState(false);
   const [isListening, setIsListening] = useState(false);
   
@@ -133,7 +133,7 @@ const Busqueda = () => {
     }
 
     // 3. Filtro visual de Rating (Estrellas)
-    const matchesRating = book.rating >= minRating;
+    const matchesRating = book.rating <= maxRating;
 
     return matchesSearch && matchesCategory && matchesRating;
   });
@@ -204,17 +204,17 @@ const Busqueda = () => {
             </div>
 
             <div className="filter-block">
-              <span className="filter-label">Calificación Mínima: {minRating > 0 ? `${minRating} ⭐` : 'Cualquiera'}</span>
+              <span className="filter-label">Calificación Máxima: {maxRating < 5 ? (maxRating === 1 ? 'Solo 1 ⭐' : `Hasta ${maxRating} ⭐`) : 'Todas (Hasta 5 ⭐)'}</span>
               <div className="slider-container">
                 <input 
                   type="range" 
-                  min="0" max="5" 
-                  value={minRating} 
-                  onChange={(e) => setMinRating(parseInt(e.target.value))}
+                  min="1" max="5" 
+                  value={maxRating} 
+                  onChange={(e) => setMaxRating(parseInt(e.target.value))}
                   className="rating-slider"
                 />
                 <div className="slider-marks">
-                  <span>Todas</span>
+                  <span>1 ⭐</span>
                   <span>⭐⭐⭐⭐⭐</span>
                 </div>
               </div>
@@ -231,9 +231,9 @@ const Busqueda = () => {
               filteredBooks.map((book) => <BookCard key={book.id} book={book} creditosDisponibles={5 - reservasActivas.length} />)
             ) : (
               <div className="no-results glass-panel">
-                <span className="no-results-icon">👻</span>
-                <h3>Oops... No encontramos nada</h3>
-                <p>Intenta buscar por voz o relajando los filtros.</p>
+                <span className="no-results-icon">😕</span>
+                <h3>Oops... No está el libro que buscas.</h3>
+                <p>Intenta buscar por voz o con filtros diferentes.</p>
               </div>
             )
           )}
