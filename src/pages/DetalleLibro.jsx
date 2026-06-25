@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { subscribeToBookById, addReservation, updateBookStock, subscribeToUserActiveReservations, getBookReviews } from '../bookService.js';
+import { subscribeToBookById, addReservation, updateBookStock, subscribeToUserActiveReservations, getBookReviews, checkBannedCategory } from '../bookService.js';
 import toast from 'react-hot-toast';
 import { Heart, Star } from 'lucide-react';
 import './DetalleLibro.css';
@@ -55,6 +55,12 @@ const DetalleLibro = () => {
   const handleReserveClick = async () => {
     const creditosDisponibles = 5 - (reservasActivas?.length || 0);
     if (creditosDisponibles <= 0) return setShowCreditLimitModal(true);
+
+    const isBanned = await checkBannedCategory(currentUser?.email, book.category || 'General');
+    if (isBanned) {
+      toast.error(`Tienes una penalización activa. No puedes reservar libros de género '${book.category || 'General'}' durante 1 semana.`);
+      return;
+    }
 
     const isDuplicate = reservasActivas.some(r => r.bookId === book.id);
     if (isDuplicate) {

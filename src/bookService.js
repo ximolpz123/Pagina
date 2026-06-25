@@ -21,6 +21,7 @@ export const addReservation = async (book, pickupDate, returnDate, userEmail) =>
     await addDoc(collection(db, 'reservations'), {
       bookId: book.id,
       bookTitle: book.title,
+      bookCategory: book.category || 'General',
       userEmail: userEmail || 'desconocido',
       pickupDate,
       returnDate,
@@ -207,5 +208,43 @@ export const getBookReviews = async (bookId) => {
   } catch (error) {
     console.error("Error fetching reviews: ", error);
     return [];
+  }
+};
+
+export const checkBannedCategory = async (userEmail, category) => {
+  if (!userEmail || !category) return false;
+  try {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayDate = new Date();
+
+    // 1. Activas atrasadas
+    const qActive = query(collection(db, 'reservations'), where('userEmail', '==', userEmail), where('status', '==', 'active'));
+    const snapActive = await getDocs(qActive);
+    for (const doc of snapActive.docs) {
+      const res = doc.data();
+      if (res.bookCategory === category && res.returnDate) {
+         if (todayStr > res.returnDate) return true;
+      }
+    }
+
+    // 2. Historial devuelto atrasado en los últimos 7 días
+    const qHistory = query(collection(db, 'reservations'), where('userEmail', '==', userEmail), where('status', '==', 'returned'));
+    const snapHistory = await getDocs(qHistory);
+    for (const doc of snapHistory.docs) {
+      const res = doc.data();
+      if (res.bookCategory === category && res.returnDate && res.returnedAt) {
+         const dueDate = new Date(res.returnDate);
+         const returnedDate = new Date(res.returnedAt);
+         if (returnedDate > dueDate) {
+           const diffTime = Math.abs(todayDate - returnedDate);
+           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+           if (diffDays <= 7) return true;
+         }
+      }
+    }
+    return false;
+  } catch (error) {
+    console.error("Error validando penalización de categoría:", error);
+    return false;
   }
 };

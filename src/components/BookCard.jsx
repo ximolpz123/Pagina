@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addReservation } from '../bookService.js';
+import { addReservation, checkBannedCategory } from '../bookService.js';
 import toast from 'react-hot-toast';
 import './BookCard.css';
 import { useAuth } from '../context/AuthContext';
@@ -42,6 +42,12 @@ const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsBut
       return;
     }
     if (creditosDisponibles <= 0) return setShowCreditLimitModal(true);
+
+    const isBanned = await checkBannedCategory(currentUser?.email, book.category || 'General');
+    if (isBanned) {
+      toast.error(`Tienes una penalización activa. No puedes reservar libros de género '${book.category || 'General'}' durante 1 semana.`);
+      return;
+    }
     
     const isDuplicate = reservasActivas.some(r => r.bookId === book.id);
     if (isDuplicate) {

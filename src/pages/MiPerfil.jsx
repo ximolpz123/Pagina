@@ -58,6 +58,7 @@ const MiPerfil = () => {
   const [historyReservations, setHistoryReservations] = useState([]);
   const [finesPaid, setFinesPaid] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [showFinesTooltip, setShowFinesTooltip] = useState(false);
   const [editName, setEditName] = useState('');
   const [editPhoto, setEditPhoto] = useState('');
   const [editCareer, setEditCareer] = useState('');
@@ -103,7 +104,7 @@ const MiPerfil = () => {
     let totalMulta = 0;
     const todayStr = getFormattedDate(new Date());
     activeReservations.forEach(res => {
-      if (res.returnDate && todayStr > res.returnDate) totalMulta += 5000;
+      if (res.returnDate && todayStr > res.returnDate) totalMulta += 5; // 5 décimas por libro
     });
     return totalMulta;
   };
@@ -211,12 +212,21 @@ const MiPerfil = () => {
             <h3>Activos</h3>
             <p className="stat-value">{activeReservations.length}</p>
           </div>
-          <div className={`stat-card glass-panel ${multasPendientes > 0 ? 'danger' : 'success'}`}>
-            <h3>Multas</h3>
-            <p className="stat-value">${multasPendientes.toLocaleString('es-CL')}</p>
+          <div className={`stat-card glass-panel ${multasPendientes > 0 ? 'danger' : 'success'}`} style={{ position: 'relative', overflow: 'visible' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', cursor: 'pointer' }} onClick={() => setShowFinesTooltip(!showFinesTooltip)}>
+              Multas
+              <span className="info-icon" style={{ backgroundColor: '#3b82f6', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>i</span>
+            </h3>
+            {showFinesTooltip && (
+              <div style={{ position: 'absolute', top: '40px', left: '50%', transform: 'translateX(-50%)', backgroundColor: 'var(--card-bg)', color: 'var(--text-main)', border: '1px solid var(--border-color)', padding: '0.8rem', borderRadius: '8px', zIndex: 10, width: '220px', fontSize: '0.8rem', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
+                <strong>Penalización Académica:</strong> Si te atrasas (más de 7 días), pierdes 5 décimas en tu próxima evaluación. Además, si entregas atrasado, no podrás reservar libros del mismo género por 1 semana.
+                <button onClick={(e) => { e.stopPropagation(); setShowFinesTooltip(false); }} style={{ display: 'block', marginTop: '0.5rem', width: '100%', padding: '0.3rem', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '4px', border: 'none' }}>Entendido</button>
+              </div>
+            )}
+            <p className="stat-value" style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{multasPendientes} décimas</p>
             {multasPendientes > 0 && (
               <button onClick={() => setFinesPaid(true)} className="pay-fine-btn">
-                Pagar Deuda
+                Justificar Atraso
               </button>
             )}
           </div>

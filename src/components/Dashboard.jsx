@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { subscribeToBooks, subscribeToUserActiveReservations } from '../bookService.js';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import BookCard from './BookCard.jsx';
@@ -14,7 +15,8 @@ const Dashboard = () => {
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
   const isLibrarian = currentUser?.email === 'bibliotecario@santotomas.cl';
 
   useEffect(() => {
@@ -104,6 +106,7 @@ const Dashboard = () => {
   const recommended = books.filter(b => b.rating >= 4).slice(0, 5);
   // Reemplazamos Math.random por un orden determinista simulado para evitar el error del linter
   const popular = [...books].sort((a, b) => (b.title?.length || 0) - (a.title?.length || 0)).slice(0, 5);
+  const mostRented = [...books].sort((a, b) => (b.author?.length || 0) - (a.author?.length || 0)).slice(0, 5);
   
   const favoriteBooks = books.filter(b => favoriteIds.includes(b.id));
 
@@ -141,6 +144,14 @@ const Dashboard = () => {
             📖 ¿Quiénes somos? / Guía
           </button>
         )}
+        {isLibrarian && (
+          <button className="about-btn" style={{ backgroundColor: '#ef4444', color: 'white' }} onClick={async () => {
+            await logout();
+            navigate('/login');
+          }}>
+            🚪 Cerrar Sesión
+          </button>
+        )}
       </header>
       
       <main className="dashboard-main">
@@ -152,12 +163,14 @@ const Dashboard = () => {
             {isLibrarian ? (
               <>
                 {renderCarousel("✨ Nuevos Ingresos al Catálogo", newReleases)}
+                {renderCarousel("🏆 Más rentados este mes", mostRented)}
               </>
             ) : (
               <>
                 {/* CARRUSELES PARA EL USUARIO */}
                 {favoriteBooks.length > 0 && renderCarousel("❤️ Mis Favoritos", favoriteBooks)}
                 {renderCarousel("🔥 Tendencias Actuales", popular)}
+                {renderCarousel("🏆 Más rentados este mes", mostRented)}
                 {renderCarousel("✨ Nuevos Ingresos", newReleases)}
                 {renderCarousel("⭐ Recomendados para ti", recommended)}
               </>
@@ -181,6 +194,10 @@ const Dashboard = () => {
               <div className="kpi-card glass-panel">
                 <h3>En Préstamo</h3>
                 <p className="kpi-value" style={{color: '#f59e0b'}}>{finalBorrowed}</p>
+              </div>
+              <div className="kpi-card glass-panel">
+                <h3>Agotados</h3>
+                <p className="kpi-value" style={{color: '#ef4444'}}>{finalTotal - finalAvailable}</p>
               </div>
               <div className="kpi-card glass-panel">
                 <h3>Nuevos este mes</h3>
@@ -247,12 +264,17 @@ const Dashboard = () => {
                 <h3>🎯 ¿Cómo funciona?</h3>
                 <ol>
                   <li>
-                    <strong>Busca:</strong> Usa nuestro buscador inteligente por voz, escáner de ISBN <em>(el código de barras único que identifica a cada libro)</em> o filtros dinámicos. Fíjate en los colores: 🟢 Disponible, 🟡 Última copia, 🔴 Agotado.
+                    <strong>1. Busca:</strong> Ingresa a la lupa inferior (Buscar). Usa nuestro buscador inteligente por voz, escáner de ISBN o los filtros rápidos (Píldoras).
                   </li>
                   <li>
-                    <strong>Reserva:</strong> Usa el botón de "Reserva" (a 1 Click) para apartar el libro por 7 días.
+                    <strong>2. Verifica:</strong> Fíjate en los colores de la tarjeta: 🟢 Disponible, 🟡 Última copia, 🔴 Agotado.
                   </li>
-                  <li><strong>Retira:</strong> Ve a "Mi Perfil" y muestra tu Código QR al bibliotecario (puedes hacerle clic para agrandarlo).</li>
+                  <li>
+                    <strong>3. Reserva:</strong> Haz clic en el botón "⚡ Reserva" (a 1 Click) para apartar el libro por 7 días. Aparecerá un mensaje verde de éxito.
+                  </li>
+                  <li>
+                    <strong>4. Retira:</strong> Ve a tu pestaña de "Mi Perfil" y muestra tu Código QR al bibliotecario (hazle clic para agrandarlo) para llevarte el libro físico.
+                  </li>
                 </ol>
               </div>
 
@@ -270,7 +292,8 @@ const Dashboard = () => {
                 <ul>
                   <li>Límite máximo de <strong>5 libros</strong> en préstamo simultáneo.</li>
                   <li>Tiempo de préstamo estándar de <strong>1 semana (7 días)</strong>.</li>
-                  <li>⚠️ <strong>Multas:</strong> $5.000 CLP por cada libro atrasado.</li>
+                  <li>⚠️ <strong>Penalización Académica:</strong> Se descontarán <strong>5 décimas</strong> en tu próxima nota por cada libro atrasado.</li>
+                  <li>🚫 <strong>Bloqueo Temporal:</strong> Si entregas un libro atrasado, no podrás volver a reservar libros de <strong>ese mismo género</strong> (ej. Ficción) durante 1 semana.</li>
                 </ul>
               </div>
             </div>
