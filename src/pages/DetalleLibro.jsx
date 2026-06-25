@@ -10,6 +10,7 @@ const DetalleLibro = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const isLibrarian = currentUser?.email === 'bibliotecario@santotomas.cl';
 
   const [book, setBook] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -163,29 +164,33 @@ const DetalleLibro = () => {
               <p>{book.synopsis || 'Sinopsis no disponible en la base de datos.'}</p>
             </div>
             
-            {isAvailable ? (
-              <div className="detalle-action-buttons">
-                <button className="reserve-btn-large" onClick={handleReserveClick}>
-                  Reservar
+            {!isLibrarian && (
+              isAvailable ? (
+                <div className="detalle-action-buttons">
+                  <button className="reserve-btn-large" onClick={handleReserveClick}>
+                    Reservar
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  className="request-stock-btn-large" 
+                  onClick={handleRequestStock}
+                  disabled={stockRequested}
+                >
+                  {stockRequested ? '✅ Ya solicitado' : '🔔 Solicitar Stock a Biblioteca'}
                 </button>
-              </div>
-            ) : (
-              <button 
-                className="request-stock-btn-large" 
-                onClick={handleRequestStock}
-                disabled={stockRequested}
-              >
-                {stockRequested ? '✅ Ya solicitado' : '🔔 Solicitar Stock a Biblioteca'}
-              </button>
+              )
             )}
 
-            <div className="admin-section glass-panel">
-              <h4>Panel de Bibliotecario</h4>
-              <div className="stock-control">
-                <input type="number" value={newStock} onChange={(e) => setNewStock(e.target.value)} />
-                <button onClick={handleStockUpdate}>Actualizar</button>
+            {isLibrarian && (
+              <div className="admin-section glass-panel">
+                <h4>Panel de Bibliotecario</h4>
+                <div className="stock-control">
+                  <input type="number" value={newStock} onChange={(e) => setNewStock(e.target.value)} />
+                  <button onClick={handleStockUpdate}>Actualizar</button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

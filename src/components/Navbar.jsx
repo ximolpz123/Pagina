@@ -6,6 +6,7 @@ import './Navbar.css';
 
 const Navbar = () => {
   const { currentUser } = useAuth();
+  const isLibrarian = currentUser?.email === 'bibliotecario@santotomas.cl';
   const [isDark, setIsDark] = useState(() => {
     return localStorage.getItem('theme') === 'dark';
   });
@@ -32,19 +33,23 @@ const Navbar = () => {
         <span className="nav-label">Buscar</span>
       </NavLink>
       
-      <NavLink to="/bibliotecario" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-        <PlusCircle className="nav-icon" />
-        <span className="nav-label">Añadir</span>
-      </NavLink>
+      {isLibrarian && (
+        <NavLink to="/bibliotecario" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+          <PlusCircle className="nav-icon" />
+          <span className="nav-label">Añadir</span>
+        </NavLink>
+      )}
 
-      <NavLink to="/perfil" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-        {currentUser?.photoURL ? (
-          <img src={currentUser.photoURL} alt="Perfil" className="nav-icon nav-avatar" style={{width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover'}} />
-        ) : (
-          <User className="nav-icon" />
-        )}
-        <span className="nav-label">{currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'Perfil'}</span>
-      </NavLink>
+      {!isLibrarian && (
+        <NavLink to="/perfil" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+          {currentUser?.photoURL ? (
+            <img src={currentUser.photoURL} alt="Perfil" className="nav-icon nav-avatar" style={{width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover'}} />
+          ) : (
+            <User className="nav-icon" />
+          )}
+          <span className="nav-label">{currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'Perfil'}</span>
+        </NavLink>
+      )}
 
       <button className="nav-item theme-toggle" onClick={() => setIsDark(!isDark)}>
         {isDark ? <Sun className="nav-icon" /> : <Moon className="nav-icon" />}

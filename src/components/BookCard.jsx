@@ -9,6 +9,7 @@ import { Heart } from 'lucide-react';
 const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsButton, reservasActivas = [] }) => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const isLibrarian = currentUser?.email === 'bibliotecario@santotomas.cl';
   const [showCreditLimitModal, setShowCreditLimitModal] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [stockRequested, setStockRequested] = useState(false);
@@ -128,12 +129,12 @@ const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsBut
           </span>
           
           <div className="book-actions">
-            {!hideReserveButton && isAvailable && (
+            {!isLibrarian && !hideReserveButton && isAvailable && (
               <button className="reserve-btn" onClick={handleReserveClick} title="Reserva rápida por 1 semana">
                 ⚡ Reserva
               </button>
             )}
-            {!isAvailable && !hideReserveButton && (
+            {!isLibrarian && !isAvailable && !hideReserveButton && (
               <button 
                 className="request-stock-btn" 
                 onClick={handleRequestStock}

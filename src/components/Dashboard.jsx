@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { currentUser } = useAuth();
+  const isLibrarian = currentUser?.email === 'bibliotecario@santotomas.cl';
 
   useEffect(() => {
     const loadFavorites = () => {
@@ -125,12 +126,21 @@ const Dashboard = () => {
     <div className="dashboard-container">
       <header className="dashboard-header glass-panel" style={{ position: 'relative' }}>
         <div>
-          <h1>Bienvenido, {currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'Lector'} 👋</h1>
-          <p>Aquí encontrarás tus libros favoritos o de estudio.</p>
+          <h1>
+            {isLibrarian 
+              ? 'Bienvenido Bibliotecario 👋' 
+              : `Bienvenido, ${currentUser?.displayName ? currentUser.displayName.split(' ')[0] : 'Lector'} 👋`
+            }
+          </h1>
+          {!isLibrarian && (
+            <p>Aquí encontrarás tus libros favoritos o de estudio.</p>
+          )}
         </div>
-        <button className="about-btn" onClick={() => setShowAboutModal(true)}>
-          📖 ¿Quiénes somos? / Guía
-        </button>
+        {!isLibrarian && (
+          <button className="about-btn" onClick={() => setShowAboutModal(true)}>
+            📖 ¿Quiénes somos? / Guía
+          </button>
+        )}
       </header>
       
       <main className="dashboard-main">
@@ -138,11 +148,20 @@ const Dashboard = () => {
           <DashboardSkeleton />
         ) : (
           <>
-            {/* CARRUSELES PARA EL USUARIO */}
-            {favoriteBooks.length > 0 && renderCarousel("❤️ Mis Favoritos", favoriteBooks)}
-            {renderCarousel("🔥 Tendencias Actuales", popular)}
-            {renderCarousel("✨ Nuevos Ingresos", newReleases)}
-            {renderCarousel("⭐ Recomendados para ti", recommended)}
+            {/* VISTA SEGÚN ROL */}
+            {isLibrarian ? (
+              <>
+                {renderCarousel("✨ Nuevos Ingresos al Catálogo", newReleases)}
+              </>
+            ) : (
+              <>
+                {/* CARRUSELES PARA EL USUARIO */}
+                {favoriteBooks.length > 0 && renderCarousel("❤️ Mis Favoritos", favoriteBooks)}
+                {renderCarousel("🔥 Tendencias Actuales", popular)}
+                {renderCarousel("✨ Nuevos Ingresos", newReleases)}
+                {renderCarousel("⭐ Recomendados para ti", recommended)}
+              </>
+            )}
 
             {/* ESTADÍSTICAS REQUERIDAS (REINTEGRADAS) */}
             <section className="stats-header">
