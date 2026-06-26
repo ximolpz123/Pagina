@@ -60,7 +60,7 @@ const Busqueda = () => {
   const MAIN_CATEGORIES = [
     'Todas', 'Acción', 'Ciencia Ficcion', 'Ciencias Básicas', 
     'Comics', 'Fantasia', 'Informática', 'Literatura', 
-    'Medicina', 'Romance', 'Thriller'
+    'Medicina', 'Psicología', 'Romance', 'Thriller'
   ];
 
   useEffect(() => {
