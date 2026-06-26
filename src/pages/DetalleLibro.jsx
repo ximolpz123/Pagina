@@ -20,6 +20,7 @@ const DetalleLibro = () => {
   const [reservasActivas, setReservasActivas] = useState([]);
   const [showCreditLimitModal, setShowCreditLimitModal] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [stockRequested, setStockRequested] = useState(false);
 
@@ -116,16 +117,19 @@ const DetalleLibro = () => {
     }
   };
 
-  const handleDeleteBook = async () => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar este libro del catálogo? Esta acción no se puede deshacer.')) {
-      const res = await deleteBook(id);
-      if (res.success) {
-        toast.success('Libro eliminado correctamente');
-        navigate('/'); // Redirigir al inicio después de eliminar
-      } else {
-        toast.error('Error al eliminar el libro');
-      }
+  const handleDeleteBook = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteBook = async () => {
+    const res = await deleteBook(id);
+    if (res.success) {
+      toast.success('Libro eliminado correctamente');
+      navigate('/'); // Redirigir al inicio después de eliminar
+    } else {
+      toast.error('Error al eliminar el libro');
     }
+    setShowDeleteModal(false);
   };
 
   const handleToggleFavorite = () => {
@@ -319,7 +323,7 @@ const DetalleLibro = () => {
           </div>
         </div>
       )}
-      {/* Modal de Reserva Duplicada */}
+
       {showDuplicateModal && (
         <div className="reservation-modal-overlay">
           <div className="reservation-modal-content warning-modal glass-panel">
@@ -333,7 +337,19 @@ const DetalleLibro = () => {
           </div>
         </div>
       )}
-
+      {showDeleteModal && (
+        <div className="reservation-modal-overlay">
+          <div className="reservation-modal-content danger-modal glass-panel">
+            <span className="warning-icon" style={{ fontSize: '3rem', color: 'var(--danger-color)' }}>⚠️</span>
+            <h3 style={{ color: 'var(--text-main)', marginTop: '1rem' }}>¿Eliminar este libro?</h3>
+            <p style={{ color: 'var(--text-muted)' }}>Esta acción es permanente y no se puede deshacer. El libro desaparecerá del catálogo para todos los estudiantes.</p>
+            <div className="modal-actions" style={{ marginTop: '1.5rem' }}>
+              <button className="cancel-btn" onClick={() => setShowDeleteModal(false)}>Cancelar</button>
+              <button className="confirm-btn" style={{ background: 'var(--danger-color)' }} onClick={confirmDeleteBook}>Sí, Eliminar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
