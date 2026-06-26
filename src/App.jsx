@@ -10,6 +10,7 @@ import DetalleLibro from './pages/DetalleLibro.jsx';
 import MiPerfil from './pages/MiPerfil.jsx';
 import Bibliotecario from './pages/Bibliotecario.jsx';
 import GuiaBibliotecario from './pages/GuiaBibliotecario.jsx';
+import Escaner from './pages/Escaner.jsx';
 import Navbar from './components/Navbar.jsx';
 import Login from './pages/Login.jsx';
 
@@ -47,6 +48,7 @@ function App() {
             <Route path="/perfil" element={<MiPerfil />} />
             <Route path="/bibliotecario" element={<Bibliotecario />} />
             <Route path="/guia" element={<GuiaBibliotecario />} />
+            <Route path="/escaner" element={<Escaner />} />
             <Route path="/libro/:id" element={<DetalleLibro />} />
           </Route>
         </Routes>

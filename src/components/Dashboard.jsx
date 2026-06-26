@@ -226,8 +226,8 @@ const Dashboard = () => {
         )}
         {isLibrarian && (
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="about-btn" style={{ backgroundColor: '#10b981', color: 'white' }} onClick={exportToExcel}>
-              📊 Descargar Reporte Excel
+            <button className="about-btn" style={{ backgroundColor: 'var(--primary-color)', color: 'white' }} onClick={() => navigate('/guia')}>
+              📖 Guía
             </button>
             <button className="about-btn" style={{ backgroundColor: '#ef4444', color: 'white' }} onClick={async () => {
               await logout();
@@ -324,6 +324,19 @@ const Dashboard = () => {
                 </div>
               </div>
             </section>
+            
+            {isLibrarian && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem', paddingBottom: '2rem' }}>
+                <button 
+                  style={{ padding: '1rem 2rem', backgroundColor: '#10b981', color: 'white', borderRadius: '12px', border: 'none', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'transform 0.2s' }} 
+                  onClick={exportToExcel}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  📊 Descargar Reporte Completo de Inventario (Excel)
+                </button>
+              </div>
+            )}
           </>
         )}
       </main>

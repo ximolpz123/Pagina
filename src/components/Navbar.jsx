@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Search, PlusCircle, User, Moon, Sun, BookOpen, Bell } from 'lucide-react';
+import { Home, Search, PlusCircle, User, Moon, Sun, BookOpen, Bell, ScanLine } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { subscribeToUserActiveReservations } from '../bookService.js';
 import './Navbar.css';
@@ -74,9 +74,9 @@ const Navbar = () => {
             <PlusCircle className="nav-icon" />
             <span className="nav-label">Añadir</span>
           </NavLink>
-          <NavLink to="/guia" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-            <BookOpen className="nav-icon" />
-            <span className="nav-label">Guía</span>
+          <NavLink to="/escaner" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+            <ScanLine className="nav-icon" />
+            <span className="nav-label">Escáner</span>
           </NavLink>
         </>
       )}
