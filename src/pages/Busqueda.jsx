@@ -4,6 +4,7 @@ import { subscribeToBooks, subscribeToUserActiveReservations } from '../bookServ
 import { BookCardSkeleton } from '../components/Skeletons.jsx';
 import ISBNScanner from '../components/ISBNScanner.jsx';
 import { Mic, ScanBarcode, Search as SearchIcon, SlidersHorizontal } from 'lucide-react';
+import toast from 'react-hot-toast';
 import './Busqueda.css';
 import { useAuth } from '../context/AuthContext';
 
@@ -109,9 +110,9 @@ const Busqueda = () => {
         console.error("Error en reconocimiento de voz: ", e.error);
         setIsListening(false);
         if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-          alert("El navegador bloqueó el micrófono. Por favor, dale permisos a la página para usar el micrófono (icono de candado en la barra de direcciones).");
+          toast.error("El navegador bloqueó el micrófono. Por favor, dale permisos a la página para usar el micrófono (icono de candado en la barra de direcciones).", { duration: 6000 });
         } else if (e.error !== 'no-speech') {
-          alert("Error con el micrófono: " + e.error);
+          toast.error("Error con el micrófono: " + e.error);
         }
       };
 
@@ -126,7 +127,7 @@ const Busqueda = () => {
         setIsListening(false);
       }
     } else {
-      alert("Tu navegador no soporta búsqueda por voz nativa. Te sugerimos usar Chrome o Edge.");
+      toast.error("Tu navegador no soporta búsqueda por voz nativa. Te sugerimos usar Chrome o Edge.");
     }
   };
 

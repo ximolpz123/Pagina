@@ -140,7 +140,7 @@ const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsBut
             </div>
           </div>
           {!isLibrarian && (
-            <button className={`favorite-btn ${isFavorite ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); toggleFavorite(); }}>
+            <button className={`favorite-btn ${isFavorite ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); toggleFavorite(e); }}>
               <Heart fill={isFavorite ? '#ef4444' : 'transparent'} color={isFavorite ? '#ef4444' : 'white'} />
             </button>
           )}

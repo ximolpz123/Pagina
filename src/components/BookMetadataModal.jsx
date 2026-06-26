@@ -22,14 +22,14 @@ const BookMetadataModal = ({ isOpen, onClose, searchQuery, onSelectBook }) => {
       const cleanTitle = query.replace(/['"]/g, '');
       const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(cleanTitle)}&maxResults=6`);
       const data = await res.json();
-      
+
       if (data.items && data.items.length > 0) {
         setResults(data.items);
       } else {
         // Fallback a OpenLibrary Search API
         const olRes = await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(cleanTitle)}&limit=6`);
         const olData = await olRes.json();
-        
+
         if (olData.docs && olData.docs.length > 0) {
           const mappedItems = olData.docs.map(doc => ({
             id: doc.key,
@@ -86,17 +86,17 @@ const BookMetadataModal = ({ isOpen, onClose, searchQuery, onSelectBook }) => {
       <div className="metadata-modal-content">
         <div className="metadata-modal-header">
           <div>
-            <h3>🔍 Buscador Mágico de Ediciones</h3>
+            <h3>🔍 Buscador de Ediciones</h3>
             <p className="metadata-subtitle">Selecciona la portada que coincida con tu libro físico para extraer sus datos automáticamente.</p>
           </div>
           <button className="close-btn" onClick={onClose} title="Cerrar">&times;</button>
         </div>
-        
+
         <div className="metadata-modal-body">
           {loading ? (
             <div className="loading-container">
               <div className="book-spinner">📖</div>
-              <p>Explorando bibliotecas mundiales...</p>
+              <p>Explorando bibliotecas online...</p>
             </div>
           ) : error ? (
             <div className="error-message">{error}</div>
