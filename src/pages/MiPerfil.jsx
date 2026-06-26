@@ -10,7 +10,7 @@ import { auth } from '../firebase';
 import { updateProfile } from 'firebase/auth';
 import './MiPerfil.css';
 
-const SwipeableReservation = ({ res, onReturn, onExpandQR }) => {
+const SwipeableReservation = ({ res, onReturn, onExpandQR, isPending }) => {
   const [swiped, setSwiped] = useState(false);
 
   const handlers = useSwipeable({
@@ -24,25 +24,27 @@ const SwipeableReservation = ({ res, onReturn, onExpandQR }) => {
     <div className="swipe-wrapper" {...handlers}>
       <div className={`swipe-content ${swiped ? 'swiped' : ''} glass-panel`}>
         <div className="desktop-return-box">
-          <button onClick={() => onReturn(res.id, res.bookId, res.bookTitle)} className="desktop-return-btn" title="Devolver libro">
+          <button onClick={() => onReturn(res.id, res.bookId, res.bookTitle)} className="desktop-return-btn" title={isPending ? "Cancelar reserva" : "Devolver libro"}>
             <RefreshCcw size={20} />
           </button>
         </div>
         <div className="res-info-main">
           <h4>{res.bookTitle}</h4>
           <span className="due-date">Devolución: <strong>{res.returnDate}</strong></span>
-          <p className="swipe-hint">👈 Desliza para devolver</p>
+          <p className="swipe-hint">👈 Desliza para {isPending ? "cancelar" : "devolver"}</p>
         </div>
-        <div className="qr-code-box" onClick={() => onExpandQR(res)} style={{ cursor: 'pointer' }} title="Ampliar Código QR">
-          <QRCodeSVG value={`RETIRAR:${res.id}`} size={50} level="L" includeMargin={false} />
-          <span>QR Retiro</span>
-        </div>
+        {isPending && (
+          <div className="qr-code-box" onClick={() => onExpandQR(res)} style={{ cursor: 'pointer' }} title="Ampliar Código QR">
+            <QRCodeSVG value={`RETIRAR:${res.id}`} size={50} level="L" includeMargin={false} />
+            <span>QR Retiro</span>
+          </div>
+        )}
       </div>
       
       <div className="swipe-action">
         <button onClick={() => onReturn(res.id, res.bookId, res.bookTitle)} className="btn-swipe-return">
           <RefreshCcw size={20} />
-          Devolver
+          {isPending ? "Cancelar" : "Devolver"}
         </button>
       </div>
     </div>
@@ -180,28 +182,47 @@ const MiPerfil = () => {
     }
   };
 
+  // Efecto para cerrar automáticamente el QR si el bibliotecario lo aprueba en tiempo real
+  useEffect(() => {
+    if (expandedQRRes) {
+      const isStillPending = activeReservations.some(r => r.id === expandedQRRes.id && r.status === 'pending_pickup');
+      if (!isStillPending) {
+        setExpandedQRRes(null);
+        toast.success('¡El bibliotecario ha verificado tu préstamo!', { icon: '🎉', duration: 4000 });
+      }
+    }
+  }, [activeReservations, expandedQRRes]);
+
   // --- LOGICA DE GAMIFICACIÓN ---
   const xp = historyReservations.length * 50;
   let rankName = 'Lector Principiante';
   let xpProgress = xp;
-  let xpMax = 100;
+  let xpMax = 250; // Requiere 5 libros para subir a Explorador
   let rankIcon = '🌱';
 
-  if (xp >= 100 && xp < 300) {
+  if (xp >= 250 && xp < 750) {
     rankName = 'Explorador Literario';
-    xpProgress = xp - 100;
-    xpMax = 200; // 300 - 100
+    xpProgress = xp - 250;
+    xpMax = 500; // 750 - 250 (10 libros adicionales)
     rankIcon = '🗺️';
-  } else if (xp >= 300) {
+  } else if (xp >= 750 && xp < 1500) {
     rankName = 'Ratón de Biblioteca';
-    xpProgress = xp - 300;
-    xpMax = 700; // 1000 - 300
+    xpProgress = xp - 750;
+    xpMax = 750; // 1500 - 750 (15 libros adicionales)
     rankIcon = '👑';
-    if (xp >= 1000) {
+  } else if (xp >= 1500) {
+    rankName = 'Erudito Máximo';
+    xpProgress = xp - 1500;
+    xpMax = 1000;
+    rankIcon = '🧙‍♂️';
+    if (xp >= 2500) {
         xpProgress = xpMax; // Max out
     }
   }
   const progressPercent = Math.min((xpProgress / xpMax) * 100, 100);
+
+  const pendingPickups = activeReservations.filter(r => r.status === 'pending_pickup');
+  const activeLoans = activeReservations.filter(r => r.status === 'active');
 
   return (
     <div className="perfil-container">
@@ -272,18 +293,31 @@ const MiPerfil = () => {
           </div>
         </section>
 
-        {/* Reservas Activas (SWIPEABLES) */}
+        {/* Pendientes de Retiro */}
+        {pendingPickups.length > 0 && (
+          <section className="perfil-section">
+            <h3 className="section-title" style={{ color: '#f59e0b' }}>🕒 Pendientes de Retiro</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '10px' }}>Muestra este QR al bibliotecario para retirar tu libro.</p>
+            <div className="book-list">
+              {pendingPickups.map(res => (
+                <SwipeableReservation key={res.id} res={res} onReturn={handleReturn} onExpandQR={setExpandedQRRes} isPending={true} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Reservas Activas */}
         <section className="perfil-section">
-          <h3 className="section-title">Reservas Activas</h3>
+          <h3 className="section-title">📚 Libros Activos</h3>
           <div className="book-list">
-            {activeReservations.length > 0 ? (
-              activeReservations.map(res => (
-                <SwipeableReservation key={res.id} res={res} onReturn={handleReturn} onExpandQR={setExpandedQRRes} />
+            {activeLoans.length > 0 ? (
+              activeLoans.map(res => (
+                <SwipeableReservation key={res.id} res={res} onReturn={handleReturn} onExpandQR={setExpandedQRRes} isPending={false} />
               ))
             ) : (
               <div className="empty-state glass-panel">
                 <span style={{ fontSize: '3rem', display: 'block', marginBottom: '1rem' }}>📚</span>
-                <p>No tienes libros en préstamo.</p>
+                <p>No tienes libros en préstamo activo.</p>
               </div>
             )}
           </div>

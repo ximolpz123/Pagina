@@ -368,12 +368,26 @@ const Dashboard = () => {
                     <strong>2. Verifica:</strong> Fíjate en los colores de la tarjeta: 🟢 Disponible, 🟡 Última copia, 🔴 Agotado.
                   </li>
                   <li>
-                    <strong>3. Reserva:</strong> Haz clic en el botón "⚡ Reserva" (a 1 Click) para apartar el libro por 7 días. Aparecerá un mensaje verde de éxito.
+                    <strong>3. Reserva:</strong> Haz clic en el botón "⚡ Reserva" para apartarlo por 7 días. El libro irá a tu sección "Pendientes de Retiro".
                   </li>
                   <li>
-                    <strong>4. Retira:</strong> Ve a tu pestaña de "Mi Perfil" y muestra tu Código QR al bibliotecario (hazle clic para agrandarlo) para llevarte el libro físico.
+                    <strong>4. Retira:</strong> Muestra tu Código QR al bibliotecario. ¡Al escanearlo, el préstamo se activará automáticamente y desaparecerá el QR!
                   </li>
                 </ol>
+              </div>
+
+              <div className="about-card">
+                <h3>🏆 Sistema de Recompensas (XP)</h3>
+                <p style={{ fontSize: '0.9rem', marginBottom: '8px' }}>Gana XP devolviendo libros a tiempo para subir de nivel y obtener <strong>décimas para tu próxima evaluación</strong>:</p>
+                <ul style={{ fontSize: '0.85rem' }}>
+                  <li>🌱 <strong>Lector Principiante:</strong> Nivel inicial.</li>
+                  <li>🗺️ <strong>Explorador Literario (250 XP):</strong> Recompensa: <strong>+2 décimas</strong>.</li>
+                  <li>👑 <strong>Ratón de Biblioteca (750 XP):</strong> Recompensa: <strong>+4 décimas</strong>.</li>
+                  <li>🧙‍♂️ <strong>Erudito Máximo (1500 XP):</strong> Recompensa: <strong>+6 décimas</strong>.</li>
+                </ul>
+                <div style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '10px', borderRadius: '8px', marginTop: '10px', fontSize: '0.8rem' }}>
+                  <strong>⚠️ Validación Antifraude:</strong> Para hacer válidas tus décimas, debes haber mantenido el libro al menos <strong>2 días</strong> y el bibliotecario te hará un breve <strong>interrogatorio sobre el libro</strong> al devolverlo. ¡Si respondes bien, las décimas son tuyas!
+                </div>
               </div>
 
               <div className="about-card">

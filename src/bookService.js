@@ -25,7 +25,7 @@ export const addReservation = async (book, pickupDate, returnDate, userEmail) =>
       userEmail: userEmail || 'desconocido',
       pickupDate,
       returnDate,
-      status: 'active',
+      status: 'pending_pickup',
       createdAt: new Date().toISOString()
     });
 
@@ -56,7 +56,7 @@ export const subscribeToUserActiveReservations = (userEmail, callback) => {
   const q = query(collection(db, 'reservations'), where('userEmail', '==', userEmail));
   return onSnapshot(q, (snapshot) => {
     const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    callback(docs.filter(d => d.status === 'active'));
+    callback(docs.filter(d => d.status === 'active' || d.status === 'pending_pickup'));
   }, (error) => console.error(error));
 };
 
@@ -261,25 +261,31 @@ export const deleteBook = async (bookId) => {
 
 export const verifyAndApproveReservation = async (reservationId) => {
   try {
-    const resRef = doc(db, 'reservations', reservationId);
-    const resSnap = await getDoc(resRef);
-    if (!resSnap.exists()) {
-      return { success: false, message: 'Reserva no encontrada.' };
-    }
-    const resData = resSnap.data();
+    const reservationRef = doc(db, 'reservations', reservationId);
+    const reservationSnap = await getDoc(reservationRef);
     
-    if (resData.status !== 'active') {
-      return { success: false, message: 'La reserva no está activa o ya fue devuelta.' };
+    if (!reservationSnap.exists()) {
+      return { success: false, message: 'La reserva no existe.' };
     }
     
-    await updateDoc(resRef, {
+    const data = reservationSnap.data();
+    if (data.status === 'active') {
+      return { success: false, message: 'Este préstamo ya fue entregado y está activo.' };
+    }
+    if (data.status !== 'pending_pickup') {
+      return { success: false, message: 'La reserva ya fue devuelta o cancelada.' };
+    }
+    
+    // Actualizamos a 'active' para indicar que ya se entregó físicamente
+    await updateDoc(reservationRef, { 
+      status: 'active',
       verifiedByLibrarian: true,
       verifiedAt: new Date().toISOString()
     });
     
-    return { success: true, bookTitle: resData.bookTitle, userEmail: resData.userEmail };
+    return { success: true, bookTitle: data.bookTitle };
   } catch (error) {
-    console.error("Error verificando reserva: ", error);
-    return { success: false, message: 'Error de red o base de datos.' };
+    console.error("Error verifying reservation:", error);
+    return { success: false, message: 'Hubo un error al verificar el QR.' };
   }
 };
