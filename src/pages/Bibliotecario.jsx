@@ -12,7 +12,8 @@ const Bibliotecario = () => {
     category: 'Informática',
     stock: 1,
     coverUrl: '',
-    synopsis: ''
+    synopsis: '',
+    isbn: ''
   });
   const navigate = useNavigate();
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
@@ -163,7 +164,8 @@ const Bibliotecario = () => {
           author: foundAuthor,
           synopsis: foundSynopsis,
           coverUrl: foundCover,
-          category: foundCategory
+          category: foundCategory,
+          isbn: isbn
         }));
         setNotification({ show: true, message: `¡Libro detectado y autocompletado!`, type: 'success' });
       } else {

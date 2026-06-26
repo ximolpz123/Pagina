@@ -14,6 +14,7 @@ const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsBut
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [stockRequested, setStockRequested] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isReserving, setIsReserving] = useState(false);
 
   const stock = book.stock !== undefined ? book.stock : (book.available ? 1 : 0);
   const isAvailable = stock > 0;
@@ -60,6 +61,11 @@ const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsBut
 
   const executeReservation = async () => {
     setShowDuplicateModal(false);
+    setIsReserving(true);
+    
+    // Simular un pequeño tiempo de procesamiento de red (1.5s) para UX
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
     // Reserva Express (1-Click)
     const today = new Date().toISOString().split('T')[0];
     const nextWeek = new Date();
@@ -81,6 +87,8 @@ const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsBut
     } else {
       toast.error('Hubo un error al procesar la reserva.', { id: toastId });
     }
+    
+    setIsReserving(false);
   };
 
   const handleCoverClick = () => {
@@ -195,6 +203,17 @@ const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsBut
               <button className="cancel-btn" onClick={() => setShowDuplicateModal(false)}>Cancelar</button>
               <button className="confirm-btn" style={{ background: 'var(--tertiary-color)' }} onClick={executeReservation}>Sí, Reservar</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Carga Procesando Reserva */}
+      {isReserving && (
+        <div className="reservation-modal-overlay">
+          <div className="reservation-modal-content glass-panel" style={{ textAlign: 'center', padding: '3rem' }}>
+            <div className="spinner" style={{ margin: '0 auto 1.5rem auto', width: '50px', height: '50px', border: '5px solid var(--border-color)', borderTop: '5px solid var(--primary-color)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+            <h3 style={{ color: 'var(--text-main)' }}>Procesando Reserva...</h3>
+            <p style={{ color: 'var(--text-muted)' }}>Conectando con la biblioteca y apartando tu copia física.</p>
           </div>
         </div>
       )}

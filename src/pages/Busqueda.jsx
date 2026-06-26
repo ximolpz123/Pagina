@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import BookCard from '../components/BookCard.jsx';
 import { subscribeToBooks, subscribeToUserActiveReservations } from '../bookService.js';
 import { BookCardSkeleton } from '../components/Skeletons.jsx';
+import ISBNScanner from '../components/ISBNScanner.jsx';
 import { Mic, ScanBarcode, Search as SearchIcon, SlidersHorizontal } from 'lucide-react';
 import './Busqueda.css';
 import { useAuth } from '../context/AuthContext';
@@ -24,8 +25,12 @@ const levenshteinDistance = (s1, s2) => {
 const isFuzzyMatch = (query, text) => {
   if (!query) return true;
   if (!text) return false;
-  const qWords = query.toLowerCase().trim().split(/\s+/);
-  const tWords = text.toLowerCase().trim().split(/\s+/);
+  
+  const clean = (str) => str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s]/g, '').trim();
+  
+  const qWords = clean(query).split(/\s+/);
+  const tWords = clean(text).split(/\s+/);
+  
   return qWords.every(qw => 
     tWords.some(tw => {
       if (tw.includes(qw)) return true;
@@ -47,6 +52,7 @@ const Busqueda = () => {
   const [maxRating, setMaxRating] = useState(5);
   const [showFilters, setShowFilters] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   
   const [isLoading, setIsLoading] = useState(true);
 
@@ -71,39 +77,66 @@ const Busqueda = () => {
     };
   }, [currentUser?.email]);
 
-  const handleVoiceSearch = () => {
+  const handleVoiceSearch = (e) => {
+    e.preventDefault(); // Evitar comportamientos por defecto del botón
+    
+    if (isListening) {
+      // Si ya está escuchando y hace clic, lo apagamos
+      setIsListening(false);
+      return;
+    }
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.lang = 'es-ES';
+      recognition.interimResults = true;
       
       recognition.onstart = () => {
         setIsListening(true);
       };
 
       recognition.onresult = (e) => {
-        setSearchQuery(e.results[0][0].transcript);
+        const transcript = Array.from(e.results)
+          .map(result => result[0].transcript)
+          .join('');
+        
+        setSearchQuery(transcript);
         setShowSuggestions(true);
       };
 
       recognition.onerror = (e) => {
         console.error("Error en reconocimiento de voz: ", e.error);
         setIsListening(false);
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+          alert("El navegador bloqueó el micrófono. Por favor, dale permisos a la página para usar el micrófono (icono de candado en la barra de direcciones).");
+        } else if (e.error !== 'no-speech') {
+          alert("Error con el micrófono: " + e.error);
+        }
       };
 
       recognition.onend = () => {
         setIsListening(false);
       };
 
-      recognition.start();
+      try {
+        recognition.start();
+      } catch (err) {
+        console.error(err);
+        setIsListening(false);
+      }
     } else {
-      alert("Tu navegador (ej. Firefox sin banderas activadas o navegador antiguo) no soporta búsqueda por voz nativa. Te sugerimos usar Chrome o Edge.");
+      alert("Tu navegador no soporta búsqueda por voz nativa. Te sugerimos usar Chrome o Edge.");
     }
   };
 
   const handleScannerClick = () => {
-    const isbn = prompt("Simulador de Escáner:\nApunta tu cámara o ingresa un ISBN manualmente:");
-    if (isbn) setSearchQuery(isbn);
+    setShowScanner(!showScanner);
+  };
+
+  const handleScanSuccess = (isbn) => {
+    setSearchQuery(isbn);
+    setShowScanner(false);
   };
 
   const getSuggestions = () => {
@@ -192,6 +225,16 @@ const Busqueda = () => {
               </ul>
             )}
           </div>
+
+          {/* ESCÁNER */}
+          {showScanner && (
+            <div style={{ marginTop: '1rem', width: '100%', maxWidth: '500px', margin: '1rem auto' }}>
+              <ISBNScanner 
+                onScanSuccess={handleScanSuccess} 
+                onScanFailure={() => {}} 
+              />
+            </div>
+          )}
           
           {/* FILTROS VISUALES AVANZADOS (CHIPS Y SLIDERS) */}
           <div className={`advanced-filters ${showFilters ? 'open' : ''}`}>

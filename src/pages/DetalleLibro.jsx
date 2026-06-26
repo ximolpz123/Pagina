@@ -23,6 +23,7 @@ const DetalleLibro = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [stockRequested, setStockRequested] = useState(false);
+  const [isReserving, setIsReserving] = useState(false);
 
   const [newStock, setNewStock] = useState('');
 
@@ -74,6 +75,11 @@ const DetalleLibro = () => {
 
   const executeReservation = async () => {
     setShowDuplicateModal(false);
+    setIsReserving(true);
+    
+    // Simular un pequeño tiempo de procesamiento (1.5s) para UX
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
     const today = new Date().toISOString().split('T')[0];
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 7);
@@ -95,6 +101,8 @@ const DetalleLibro = () => {
     } else {
       toast.error('Hubo un error al procesar la reserva.', { id: toastId });
     }
+    
+    setIsReserving(false);
   };
 
   const handleRequestStock = () => {
@@ -350,6 +358,18 @@ const DetalleLibro = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Carga Procesando Reserva */}
+      {isReserving && (
+        <div className="reservation-modal-overlay">
+          <div className="reservation-modal-content glass-panel" style={{ textAlign: 'center', padding: '3rem' }}>
+            <div className="spinner" style={{ margin: '0 auto 1.5rem auto', width: '50px', height: '50px', border: '5px solid var(--border-color)', borderTop: '5px solid var(--primary-color)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+            <h3 style={{ color: 'var(--text-main)' }}>Procesando Reserva...</h3>
+            <p style={{ color: 'var(--text-muted)' }}>Conectando con la biblioteca y apartando tu copia física.</p>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 };
