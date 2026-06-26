@@ -258,3 +258,28 @@ export const deleteBook = async (bookId) => {
     return { success: false, error };
   }
 };
+
+export const verifyAndApproveReservation = async (reservationId) => {
+  try {
+    const resRef = doc(db, 'reservations', reservationId);
+    const resSnap = await getDoc(resRef);
+    if (!resSnap.exists()) {
+      return { success: false, message: 'Reserva no encontrada.' };
+    }
+    const resData = resSnap.data();
+    
+    if (resData.status !== 'active') {
+      return { success: false, message: 'La reserva no está activa o ya fue devuelta.' };
+    }
+    
+    await updateDoc(resRef, {
+      verifiedByLibrarian: true,
+      verifiedAt: new Date().toISOString()
+    });
+    
+    return { success: true, bookTitle: resData.bookTitle, userEmail: resData.userEmail };
+  } catch (error) {
+    console.error("Error verificando reserva: ", error);
+    return { success: false, message: 'Error de red o base de datos.' };
+  }
+};

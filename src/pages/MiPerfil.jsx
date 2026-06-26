@@ -180,25 +180,65 @@ const MiPerfil = () => {
     }
   };
 
+  // --- LOGICA DE GAMIFICACIÓN ---
+  const xp = historyReservations.length * 50;
+  let rankName = 'Lector Principiante';
+  let xpProgress = xp;
+  let xpMax = 100;
+  let rankIcon = '🌱';
+
+  if (xp >= 100 && xp < 300) {
+    rankName = 'Explorador Literario';
+    xpProgress = xp - 100;
+    xpMax = 200; // 300 - 100
+    rankIcon = '🗺️';
+  } else if (xp >= 300) {
+    rankName = 'Ratón de Biblioteca';
+    xpProgress = xp - 300;
+    xpMax = 700; // 1000 - 300
+    rankIcon = '👑';
+    if (xp >= 1000) {
+        xpProgress = xpMax; // Max out
+    }
+  }
+  const progressPercent = Math.min((xpProgress / xpMax) * 100, 100);
+
   return (
     <div className="perfil-container">
       <header className="perfil-header glass-panel">
-        <div className="header-user-info" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {currentUser?.photoURL ? (
-            <img src={currentUser.photoURL} alt="Avatar" style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover' }} />
-          ) : (
-            <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>
-              {(currentUser?.displayName || currentUser?.email || '?')[0].toUpperCase()}
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          <div className="header-user-info" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            {currentUser?.photoURL ? (
+              <img src={currentUser.photoURL} alt="Avatar" style={{ width: 70, height: 70, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary-color)' }} />
+            ) : (
+              <div style={{ width: 70, height: 70, borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-color), #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', color: 'white', fontWeight: 'bold' }}>
+                {(currentUser?.displayName || currentUser?.email || '?')[0].toUpperCase()}
+              </div>
+            )}
+            <div>
+              <h2>{currentUser?.displayName || 'Mi Perfil'}</h2>
+              <p style={{ color: 'var(--text-muted)' }}>{userCareer}</p>
+              
+              <div className="gamification-badge" style={{ marginTop: '0.8rem', backgroundColor: 'var(--card-bg)', padding: '0.5rem 1rem', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'inline-block' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '0.3rem' }}>
+                  <span style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-main)' }}>
+                    {rankIcon} Nivel: {rankName}
+                  </span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{xp} XP Total</span>
+                </div>
+                <div className="progress-bar-bg" style={{ width: '100%', height: '8px', backgroundColor: 'var(--border-color)', borderRadius: '999px', overflow: 'hidden' }}>
+                  <div className="progress-bar-fill" style={{ width: `${progressPercent}%`, height: '100%', background: 'linear-gradient(90deg, #3b82f6, var(--primary-color))', borderRadius: '999px', transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem', textAlign: 'right' }}>
+                  {xpProgress} / {xpMax} XP al próximo nivel
+                </div>
+              </div>
             </div>
-          )}
-          <div>
-            <h2>{currentUser?.displayName || 'Mi Perfil'}</h2>
-            <p>{userCareer}</p>
           </div>
+          <button className="settings-btn" onClick={() => setIsConfigOpen(true)} style={{ height: 'fit-content' }}>
+            <Settings size={24} />
+          </button>
         </div>
-        <button className="settings-btn" onClick={() => setIsConfigOpen(true)}>
-          <Settings size={24} />
-        </button>
       </header>
       
       <main className="perfil-main">

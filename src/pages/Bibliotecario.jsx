@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addBook } from '../bookService.js';
+import { addBook, verifyAndApproveReservation } from '../bookService.js';
 import ISBNScanner from '../components/ISBNScanner.jsx';
 import BookMetadataModal from '../components/BookMetadataModal.jsx';
+import QRScanner from '../components/QRScanner.jsx';
 import './Bibliotecario.css';
 
 const Bibliotecario = () => {
@@ -22,6 +23,27 @@ const Bibliotecario = () => {
   const [showMetadataModal, setShowMetadataModal] = useState(false);
   const [isGeneratingSynopsis, setIsGeneratingSynopsis] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showStudentQRScanner, setShowStudentQRScanner] = useState(false);
+
+  const handleStudentQRScan = async (decodedText) => {
+    setShowStudentQRScanner(false);
+    if (!decodedText.startsWith('RETIRAR:')) {
+      setNotification({ show: true, message: 'QR inválido. No pertenece a una reserva.', type: 'error' });
+      setTimeout(() => setNotification({ show: false, message: '', type: '' }), 4000);
+      return;
+    }
+    const reservationId = decodedText.split(':')[1];
+    setNotification({ show: true, message: 'Verificando préstamo...', type: 'success' });
+    
+    const res = await verifyAndApproveReservation(reservationId);
+    if (res.success) {
+      alert(`✅ Préstamo Verificado\n\nReserva aprobada para el libro: "${res.bookTitle}"`);
+      setNotification({ show: true, message: `Préstamo verificado para "${res.bookTitle}"`, type: 'success' });
+    } else {
+      setNotification({ show: true, message: res.message, type: 'error' });
+    }
+    setTimeout(() => setNotification({ show: false, message: '', type: '' }), 6000);
+  };
 
   const handleOpenMetadataModal = () => {
     if (!bookData.title.trim()) {
@@ -241,6 +263,13 @@ const Bibliotecario = () => {
               >
                 📷 {showScanner ? 'Cerrar Cámara' : 'Escanear ISBN'}
               </button>
+              <button 
+                type="button" 
+                onClick={() => setShowStudentQRScanner(true)}
+                style={{ padding: '0.8rem 1.2rem', backgroundColor: '#f59e0b', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1rem', transition: 'background-color 0.2s' }}
+              >
+                📱 Escanear QR Estudiante
+              </button>
             </div>
             
             {isSearchingISBN && <p style={{ marginTop: '10px', color: 'var(--primary-color)', fontWeight: 'bold' }}>Buscando libro en la base de datos mundial...</p>}
@@ -339,6 +368,13 @@ const Bibliotecario = () => {
             <p>El catálogo se ha actualizado correctamente.</p>
           </div>
         </div>
+      )}
+
+      {showStudentQRScanner && (
+        <QRScanner 
+          onScan={handleStudentQRScan} 
+          onClose={() => setShowStudentQRScanner(false)} 
+        />
       )}
     </div>
   );

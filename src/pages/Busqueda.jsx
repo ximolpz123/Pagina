@@ -57,7 +57,11 @@ const Busqueda = () => {
   
   const [isLoading, setIsLoading] = useState(true);
 
-  const MAIN_CATEGORIES = ['Todas', 'Informática', 'Medicina', 'Literatura', 'Ciencia Ficcion', 'Romance'];
+  const MAIN_CATEGORIES = [
+    'Todas', 'Acción', 'Ciencia Ficcion', 'Ciencias Básicas', 
+    'Comics', 'Fantasia', 'Informática', 'Literatura', 
+    'Medicina', 'Romance', 'Thriller'
+  ];
 
   useEffect(() => {
     const unsubscribeBooks = subscribeToBooks((data) => {
@@ -256,17 +260,42 @@ const Busqueda = () => {
             </div>
 
             <div className="filter-block">
-              <span className="filter-label">Categorías Rápidas</span>
-              <div className="chips-container">
-                {MAIN_CATEGORIES.map(cat => (
-                  <button 
-                    key={cat} 
-                    className={`chip ${filterCategory === cat ? 'active' : ''}`}
-                    onClick={() => setFilterCategory(cat)}
-                  >
-                    {cat}
-                  </button>
-                ))}
+              <span className="filter-label">Categoría</span>
+              <div className="select-container" style={{ position: 'relative', display: 'inline-block', minWidth: '220px', maxWidth: '300px' }}>
+                <select 
+                  style={{ 
+                    width: '100%', 
+                    cursor: 'pointer', 
+                    appearance: 'none', 
+                    background: 'var(--input-bg)', 
+                    border: '1px solid var(--border-color)', 
+                    color: 'var(--text-main)',
+                    fontSize: '1rem',
+                    padding: '0.6rem 2.5rem 0.6rem 1rem',
+                    outline: 'none',
+                    fontWeight: '500',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    transition: 'border-color 0.2s, box-shadow 0.2s'
+                  }}
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = 'var(--primary-color)';
+                    e.target.style.boxShadow = '0 0 0 2px rgba(16, 185, 129, 0.2)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'var(--border-color)';
+                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                  }}
+                >
+                  {MAIN_CATEGORIES.map(cat => (
+                    <option key={cat} value={cat} style={{ background: 'var(--bg-color)', color: 'var(--text-main)' }}>{cat}</option>
+                  ))}
+                </select>
+                <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--primary-color)', fontSize: '0.8rem' }}>
+                  ▼
+                </div>
               </div>
             </div>
 

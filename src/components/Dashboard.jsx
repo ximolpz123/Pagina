@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { subscribeToBooks, subscribeToUserActiveReservations } from '../bookService.js';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import * as XLSX from 'xlsx-js-style';
+import toast from 'react-hot-toast';
 import BookCard from './BookCard.jsx';
 import './Dashboard.css';
 import { useAuth } from '../context/AuthContext';
@@ -125,6 +127,84 @@ const Dashboard = () => {
     </section>
   );
 
+  const exportToExcel = () => {
+    if (!books || books.length === 0) {
+      toast.error('No hay libros para exportar');
+      return;
+    }
+    
+    // Mapear los libros para que se vean bien en columnas Excel
+    const rows = books.map(book => ({
+      'ID Libro': book.id,
+      'Título del Libro': book.title || 'Sin Título',
+      'Autor / Escritor': book.author || 'Anónimo',
+      'Categoría Literaria': book.category || 'General',
+      'Stock Total': book.stock || 0,
+      'Estado': book.available ? '✅ Disponible' : '❌ Agotado',
+      'Calificación (Estrellas)': book.rating || 5
+    }));
+    
+    // Crear la hoja y libro de cálculo de Excel
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    
+    // Aplicar estilos a las celdas (Bordes, Colores, Fuentes)
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellAddress = { c: C, r: R };
+        const cellRef = XLSX.utils.encode_cell(cellAddress);
+        if (!worksheet[cellRef]) continue;
+
+        let cellStyle = {
+          font: { name: 'Arial', sz: 11, color: { rgb: "333333" } },
+          border: {
+            top: { style: 'thin', color: { rgb: "CCCCCC" } },
+            bottom: { style: 'thin', color: { rgb: "CCCCCC" } },
+            left: { style: 'thin', color: { rgb: "CCCCCC" } },
+            right: { style: 'thin', color: { rgb: "CCCCCC" } }
+          },
+          alignment: { vertical: "center", horizontal: "left", wrapText: true }
+        };
+
+        if (R === 0) {
+          // Encabezados
+          cellStyle.fill = { fgColor: { rgb: "10B981" } }; // Verde
+          cellStyle.font = { name: 'Arial', sz: 12, bold: true, color: { rgb: "FFFFFF" } };
+          cellStyle.alignment.horizontal = "center";
+        } else {
+          // Filas alternas
+          if (R % 2 === 0) {
+            cellStyle.fill = { fgColor: { rgb: "F9FAFB" } }; // Gris super claro
+          } else {
+            cellStyle.fill = { fgColor: { rgb: "FFFFFF" } }; // Blanco
+          }
+        }
+
+        worksheet[cellRef].s = cellStyle;
+      }
+    }
+
+    // Ajustar el ancho de las columnas
+    const colWidths = [
+      { wch: 22 }, // ID
+      { wch: 40 }, // Título
+      { wch: 25 }, // Autor
+      { wch: 20 }, // Categoría
+      { wch: 12 }, // Stock
+      { wch: 15 }, // Estado
+      { wch: 25 }  // Rating
+    ];
+    worksheet['!cols'] = colWidths;
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventario');
+    
+    // Generar archivo y forzar descarga
+    XLSX.writeFile(workbook, `Reporte_Inventario_${new Date().toISOString().split('T')[0]}.xlsx`);
+    
+    toast.success('Reporte Excel descargado con éxito 📊');
+  };
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header glass-panel" style={{ position: 'relative' }}>
@@ -145,12 +225,17 @@ const Dashboard = () => {
           </button>
         )}
         {isLibrarian && (
-          <button className="about-btn" style={{ backgroundColor: '#ef4444', color: 'white' }} onClick={async () => {
-            await logout();
-            navigate('/login');
-          }}>
-            🚪 Cerrar Sesión
-          </button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button className="about-btn" style={{ backgroundColor: '#10b981', color: 'white' }} onClick={exportToExcel}>
+              📊 Descargar Reporte Excel
+            </button>
+            <button className="about-btn" style={{ backgroundColor: '#ef4444', color: 'white' }} onClick={async () => {
+              await logout();
+              navigate('/login');
+            }}>
+              🚪 Cerrar Sesión
+            </button>
+          </div>
         )}
       </header>
       
