@@ -74,6 +74,11 @@ export const subscribeToHistoryReservations = (callback) => {
   return onSnapshot(q, (snapshot) => callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
 };
 
+export const subscribeToAllReservationsGlobal = (callback) => {
+  const q = collection(db, 'reservations');
+  return onSnapshot(q, (snapshot) => callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+};
+
 export const returnReservation = async (reservationId, bookId) => {
   try {
     // Guardamos la fecha y hora completa en formato ISO
