@@ -26,6 +26,8 @@ export function AuthProvider({ children }) {
   }
 
   function logout() {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'light');
     return signOut(auth);
   }
 

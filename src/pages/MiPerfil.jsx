@@ -8,6 +8,8 @@ import { Settings, LogOut, RefreshCcw, Edit2, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { auth } from '../firebase';
 import { updateProfile } from 'firebase/auth';
+import { formatDistanceToNowStrict, isPast, isToday } from 'date-fns';
+import { es } from 'date-fns/locale';
 import './MiPerfil.css';
 
 const SwipeableReservation = ({ res, onReturn, onExpandQR, isPending }) => {
@@ -20,6 +22,19 @@ const SwipeableReservation = ({ res, onReturn, onExpandQR, isPending }) => {
     preventDefaultTouchmoveEvent: true,
   });
 
+  const getRelativeDate = (dateStr) => {
+    if (!dateStr) return <strong>Desconocida</strong>;
+    try {
+      const parts = dateStr.split('-');
+      const date = new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59);
+      if (isToday(date)) return <strong style={{ color: '#f59e0b' }}>Hoy</strong>;
+      if (isPast(date)) return <strong style={{ color: '#ef4444' }}>Hace {formatDistanceToNowStrict(date, { locale: es })} (Atrasado)</strong>;
+      return <strong style={{ color: '#10b981' }}>En {formatDistanceToNowStrict(date, { locale: es })}</strong>;
+    } catch {
+      return <strong>{dateStr}</strong>;
+    }
+  };
+
   return (
     <div className="swipe-wrapper" {...handlers}>
       <div className={`swipe-content ${swiped ? 'swiped' : ''} glass-panel`}>
@@ -30,7 +45,7 @@ const SwipeableReservation = ({ res, onReturn, onExpandQR, isPending }) => {
         </div>
         <div className="res-info-main">
           <h4>{res.bookTitle}</h4>
-          <span className="due-date">Devolución: <strong>{res.returnDate}</strong></span>
+          <span className="due-date">Devolución: {getRelativeDate(res.returnDate)}</span>
           <p className="swipe-hint">👈 Desliza para {isPending ? "cancelar" : "devolver"}</p>
         </div>
         {isPending && (
