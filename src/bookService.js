@@ -1,4 +1,4 @@
-import { collection, getDocs, doc, updateDoc, onSnapshot, addDoc, getDoc, query, where, runTransaction } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, onSnapshot, addDoc, getDoc, query, where, runTransaction, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase.js';
 
 export const getBooks = async () => {
@@ -246,5 +246,15 @@ export const checkBannedCategory = async (userEmail, category) => {
   } catch (error) {
     console.error("Error validando penalización de categoría:", error);
     return false;
+  }
+};
+
+export const deleteBook = async (bookId) => {
+  try {
+    await deleteDoc(doc(db, 'books', bookId));
+    return { success: true };
+  } catch (error) {
+    console.error("Error al eliminar libro:", error);
+    return { success: false, error };
   }
 };

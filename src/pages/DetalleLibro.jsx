@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { subscribeToBookById, addReservation, updateBookStock, subscribeToUserActiveReservations, getBookReviews, checkBannedCategory } from '../bookService.js';
+import { subscribeToBookById, addReservation, updateBookStock, subscribeToUserActiveReservations, getBookReviews, checkBannedCategory, deleteBook } from '../bookService.js';
 import toast from 'react-hot-toast';
 import { Heart, Star } from 'lucide-react';
 import './DetalleLibro.css';
@@ -103,12 +103,28 @@ const DetalleLibro = () => {
   };
 
   const handleStockUpdate = async () => {
-    const stockNum = parseInt(newStock, 10);
-    if (!isNaN(stockNum) && stockNum >= 0) {
-      await updateBookStock(id, stockNum);
-      alert('Stock actualizado correctamente.');
+    const stockInt = parseInt(newStock, 10);
+    if (isNaN(stockInt) || stockInt < 0) {
+      toast.error('El stock debe ser un número válido mayor o igual a 0');
+      return;
+    }
+    const res = await updateBookStock(id, stockInt);
+    if (res.success) {
+      toast.success('Stock actualizado correctamente');
     } else {
-      alert('Por favor, ingresa un número válido.');
+      toast.error('Error al actualizar el stock');
+    }
+  };
+
+  const handleDeleteBook = async () => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este libro del catálogo? Esta acción no se puede deshacer.')) {
+      const res = await deleteBook(id);
+      if (res.success) {
+        toast.success('Libro eliminado correctamente');
+        navigate('/'); // Redirigir al inicio después de eliminar
+      } else {
+        toast.error('Error al eliminar el libro');
+      }
     }
   };
 
@@ -152,9 +168,11 @@ const DetalleLibro = () => {
         <div className="detalle-content glass-panel">
           <div className="detalle-cover-wrapper">
             <img src={book.coverUrl || 'https://via.placeholder.com/250x375.png?text=Sin+Portada'} alt={book.title} className="detalle-cover" />
-            <button className={`detalle-favorite-btn ${isFavorite ? 'active' : ''}`} onClick={handleToggleFavorite}>
-              <Heart fill={isFavorite ? '#ef4444' : 'transparent'} color={isFavorite ? '#ef4444' : 'white'} size={28} />
-            </button>
+            {!isLibrarian && (
+              <button className={`detalle-favorite-btn ${isFavorite ? 'active' : ''}`} onClick={handleToggleFavorite}>
+                <Heart fill={isFavorite ? '#ef4444' : 'transparent'} color={isFavorite ? '#ef4444' : 'white'} size={28} />
+              </button>
+            )}
           </div>
           <div className="detalle-info">
             <h1 className="detalle-title">{book.title}</h1>
@@ -189,11 +207,64 @@ const DetalleLibro = () => {
             )}
 
             {isLibrarian && (
-              <div className="admin-section glass-panel">
-                <h4>Panel de Bibliotecario</h4>
-                <div className="stock-control">
-                  <input type="number" value={newStock} onChange={(e) => setNewStock(e.target.value)} />
-                  <button onClick={handleStockUpdate}>Actualizar</button>
+              <div className="admin-section glass-panel" style={{ marginTop: '2rem', padding: '1.5rem', border: '1px solid var(--primary-color)' }}>
+                <h4 style={{ color: 'var(--text-main)', marginBottom: '1rem', fontSize: '1.2rem', fontWeight: 'bold' }}>Panel de Bibliotecario</h4>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <label style={{ fontWeight: 'bold', color: 'var(--text-muted)' }}>Actualizar stock:</label>
+                    <input 
+                      type="number" 
+                      value={newStock} 
+                      onChange={(e) => setNewStock(e.target.value)} 
+                      style={{ 
+                        width: '80px', 
+                        padding: '0.6rem', 
+                        borderRadius: '8px', 
+                        border: '1px solid var(--border-color)', 
+                        background: 'var(--input-bg)', 
+                        color: 'var(--text-main)',
+                        outline: 'none'
+                      }} 
+                      min="0"
+                    />
+                    <button 
+                      onClick={handleStockUpdate}
+                      style={{ 
+                        padding: '0.6rem 1.2rem', 
+                        background: 'var(--primary-color)', 
+                        color: 'white', 
+                        border: 'none', 
+                        borderRadius: '8px', 
+                        cursor: 'pointer', 
+                        fontWeight: 'bold',
+                        transition: 'background 0.2s'
+                      }}
+                      onMouseOver={(e) => e.target.style.background = 'var(--primary-hover)'}
+                      onMouseOut={(e) => e.target.style.background = 'var(--primary-color)'}
+                    >
+                      Actualizar
+                    </button>
+                  </div>
+                  
+                  <button 
+                    onClick={handleDeleteBook}
+                    style={{ 
+                      padding: '0.6rem 1.2rem', 
+                      background: 'var(--danger-color)', 
+                      color: 'white', 
+                      border: 'none', 
+                      borderRadius: '8px', 
+                      cursor: 'pointer', 
+                      fontWeight: 'bold', 
+                      marginLeft: 'auto',
+                      transition: 'background 0.2s'
+                    }}
+                    onMouseOver={(e) => e.target.style.background = '#b91c1c'}
+                    onMouseOut={(e) => e.target.style.background = 'var(--danger-color)'}
+                  >
+                    Eliminar libro
+                  </button>
                 </div>
               </div>
             )}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Search, PlusCircle, User, Moon, Sun } from 'lucide-react';
+import { Home, Search, PlusCircle, User, Moon, Sun, BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -34,10 +34,16 @@ const Navbar = () => {
       </NavLink>
       
       {isLibrarian && (
-        <NavLink to="/bibliotecario" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
-          <PlusCircle className="nav-icon" />
-          <span className="nav-label">Añadir</span>
-        </NavLink>
+        <>
+          <NavLink to="/bibliotecario" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+            <PlusCircle className="nav-icon" />
+            <span className="nav-label">Añadir</span>
+          </NavLink>
+          <NavLink to="/guia" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+            <BookOpen className="nav-icon" />
+            <span className="nav-label">Guía</span>
+          </NavLink>
+        </>
       )}
 
       {!isLibrarian && (

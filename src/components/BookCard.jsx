@@ -120,10 +120,22 @@ const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsBut
     <>
       <div className="book-card glass-panel">
         <div className="cover-container" onClick={handleCoverClick} style={{ cursor: 'pointer' }}>
-          <img src={book.coverUrl || 'https://via.placeholder.com/200x300.png?text=Sin+Portada'} alt={`Portada de ${book.title}`} className="book-cover" />
-          <button className={`favorite-btn ${isFavorite ? 'active' : ''}`} onClick={toggleFavorite}>
-            <Heart fill={isFavorite ? '#ef4444' : 'transparent'} color={isFavorite ? '#ef4444' : 'white'} />
-          </button>
+          <div className="cover-inner">
+            <div className="cover-front">
+              <img src={book.coverUrl || 'https://via.placeholder.com/200x300.png?text=Sin+Portada'} alt={`Portada de ${book.title}`} className="book-cover" />
+            </div>
+            <div className="cover-back">
+              <div className="cover-back-content">
+                <h4>Sinopsis</h4>
+                <p>{book.synopsis || 'Resumen no disponible para esta obra. Explora más en los detalles.'}</p>
+              </div>
+            </div>
+          </div>
+          {!isLibrarian && (
+            <button className={`favorite-btn ${isFavorite ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); toggleFavorite(); }}>
+              <Heart fill={isFavorite ? '#ef4444' : 'transparent'} color={isFavorite ? '#ef4444' : 'white'} />
+            </button>
+          )}
         </div>
         <div className="book-info">
           <h3 className="book-title">{book.title}</h3>
