@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addReservation, checkBannedCategory } from '../bookService.js';
+import { addReservation, checkBannedCategory, requestStockNotification } from '../bookService.js';
 import toast from 'react-hot-toast';
 import './BookCard.css';
 import { useAuth } from '../context/AuthContext';
@@ -95,9 +95,10 @@ const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsBut
     navigate(`/libro/${book.id}`);
   };
 
-  const handleRequestStock = () => {
+  const handleRequestStock = async () => {
     if (stockRequested) return;
     setStockRequested(true);
+    await requestStockNotification(book.id, book.title, currentUser?.email);
     toast.success(`Se notificó a la biblioteca para reponer "${book.title}".`, { icon: '📨', duration: 4000 });
   };
 
@@ -130,7 +131,15 @@ const BookCard = ({ book, creditosDisponibles, hideReserveButton, hideDetailsBut
         <div className="cover-container" onClick={handleCoverClick} style={{ cursor: 'pointer' }}>
           <div className="cover-inner">
             <div className="cover-front">
-              <img src={book.coverUrl || 'https://via.placeholder.com/200x300.png?text=Sin+Portada'} alt={`Portada de ${book.title}`} className="book-cover" />
+              <img 
+                src={book.coverUrl || 'https://via.placeholder.com/200x300.png?text=Sin+Portada'} 
+                alt={`Portada de ${book.title}`} 
+                className="book-cover" 
+                onError={(e) => {
+                  e.target.onerror = null; 
+                  e.target.src = 'https://via.placeholder.com/200x300.png?text=Sin+Portada';
+                }}
+              />
             </div>
             <div className="cover-back">
               <div className="cover-back-content">

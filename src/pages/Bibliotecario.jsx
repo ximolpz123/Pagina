@@ -10,7 +10,7 @@ const Bibliotecario = () => {
     title: '',
     author: '',
     category: 'Informática',
-    stock: 1,
+    stock: '',
     coverUrl: '',
     synopsis: '',
     isbn: ''
@@ -189,6 +189,11 @@ const Bibliotecario = () => {
     e.preventDefault();
     if (!bookData.title || !bookData.author) {
       setNotification({ show: true, message: 'El título y el autor son obligatorios.', type: 'error' });
+      return;
+    }
+
+    if (bookData.stock === '' || bookData.stock === null || bookData.stock === undefined || isNaN(parseInt(bookData.stock, 10))) {
+      setNotification({ show: true, message: '¡Atención! Debes especificar la cantidad de stock disponible.', type: 'error' });
       return;
     }
 

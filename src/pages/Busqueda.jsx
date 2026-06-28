@@ -3,7 +3,7 @@ import BookCard from '../components/BookCard.jsx';
 import { subscribeToBooks, subscribeToUserActiveReservations } from '../bookService.js';
 import { BookCardSkeleton } from '../components/Skeletons.jsx';
 import ISBNScanner from '../components/ISBNScanner.jsx';
-import { Mic, ScanBarcode, Search as SearchIcon, SlidersHorizontal } from 'lucide-react';
+import { Mic, ScanBarcode, Search as SearchIcon, SlidersHorizontal, LayoutGrid, List } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './Busqueda.css';
 import { useAuth } from '../context/AuthContext';
@@ -54,6 +54,7 @@ const Busqueda = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [viewMode, setViewMode] = useState('grid');
   
   const [isLoading, setIsLoading] = useState(true);
 
@@ -319,7 +320,24 @@ const Busqueda = () => {
           </div>
         </div>
         
-        <section className="books-grid">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', gap: '0.5rem', padding: '0 1rem' }}>
+          <button 
+            onClick={() => setViewMode('grid')} 
+            style={{ background: viewMode === 'grid' ? 'var(--primary-color)' : 'transparent', color: viewMode === 'grid' ? 'white' : 'var(--text-muted)', border: '1px solid var(--border-color)', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            title="Vista de Cuadrícula"
+          >
+            <LayoutGrid size={20} />
+          </button>
+          <button 
+            onClick={() => setViewMode('list')} 
+            style={{ background: viewMode === 'list' ? 'var(--primary-color)' : 'transparent', color: viewMode === 'list' ? 'white' : 'var(--text-muted)', border: '1px solid var(--border-color)', padding: '0.4rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            title="Vista de Lista"
+          >
+            <List size={20} />
+          </button>
+        </div>
+
+        <section className={`books-grid ${viewMode}-view`}>
           {isLoading ? (
             [...Array(8)].map((_, i) => <BookCardSkeleton key={i} />)
           ) : (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { subscribeToBookById, addReservation, updateBookStock, subscribeToUserActiveReservations, getBookReviews, checkBannedCategory, deleteBook } from '../bookService.js';
+import { subscribeToBookById, addReservation, updateBookStock, subscribeToUserActiveReservations, getBookReviews, checkBannedCategory, deleteBook, addToWaitlist, requestStockNotification } from '../bookService.js';
 import toast from 'react-hot-toast';
 import { Heart, Star } from 'lucide-react';
 import './DetalleLibro.css';
@@ -23,6 +23,7 @@ const DetalleLibro = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [stockRequested, setStockRequested] = useState(false);
+  const [waitlistRequested, setWaitlistRequested] = useState(false);
   const [isReserving, setIsReserving] = useState(false);
 
   const [newStock, setNewStock] = useState('');
@@ -105,10 +106,22 @@ const DetalleLibro = () => {
     setIsReserving(false);
   };
 
-  const handleRequestStock = () => {
+  const handleRequestStock = async () => {
     if (stockRequested) return;
     setStockRequested(true);
+    await requestStockNotification(id, book.title, currentUser?.email);
     toast.success(`Se notificó a la biblioteca para reponer "${book.title}".`, { icon: '📨', duration: 4000 });
+  };
+
+  const handleWaitlistRequest = async () => {
+    if (waitlistRequested) return;
+    if (!currentUser?.email) {
+      toast.error('Debes iniciar sesión para usar esta función');
+      return;
+    }
+    setWaitlistRequested(true);
+    await addToWaitlist(id, currentUser.email, book.title);
+    toast.success('¡Te avisaremos cuando haya stock disponible!');
   };
 
   const handleStockUpdate = async () => {
@@ -208,13 +221,24 @@ const DetalleLibro = () => {
                   </button>
                 </div>
               ) : (
-                <button 
-                  className="request-stock-btn-large" 
-                  onClick={handleRequestStock}
-                  disabled={stockRequested}
-                >
-                  {stockRequested ? '✅ Ya solicitado' : '🔔 Solicitar Stock a Biblioteca'}
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button 
+                    className="request-stock-btn-large" 
+                    onClick={handleRequestStock}
+                    disabled={stockRequested}
+                    style={{ flex: 1 }}
+                  >
+                    {stockRequested ? '✅ Ya solicitado' : '🔔 Solicitar Stock a Biblioteca'}
+                  </button>
+                  <button 
+                    className="request-stock-btn-large" 
+                    onClick={handleWaitlistRequest}
+                    disabled={waitlistRequested}
+                    style={{ flex: 1, backgroundColor: 'var(--tertiary-color)', color: 'white' }}
+                  >
+                    {waitlistRequested ? '✅ En lista de espera' : '📧 Avisarme disponibilidad'}
+                  </button>
+                </div>
               )
             )}
 

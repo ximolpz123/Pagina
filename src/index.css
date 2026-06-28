@@ -31,6 +31,21 @@
   --border-color: #334155;
 }
 
+[data-theme='high-contrast'] {
+  --bg-color: #000000;
+  --secondary-color: #000000;
+  --tertiary-color: #FFFFFF;
+  --primary-color: #FFFF00; /* Yellow on black is standard for high contrast */
+  --primary-hover: #FFCC00;
+  --text-main: #FFFFFF;
+  --text-muted: #CCCCCC;
+  --success-color: #00FF00;
+  --danger-color: #FF0000;
+  --nav-bg: #000000;
+  --card-bg: #000000;
+  --input-bg: #000000;
+  --border-color: #FFFFFF;
+}
 
 
 * {

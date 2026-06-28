@@ -45,6 +45,87 @@ export const addReservation = async (book, pickupDate, returnDate, userEmail) =>
   }
 };
 
+export const addToWaitlist = async (bookId, userEmail, bookTitle) => {
+  try {
+    if (!userEmail) return { success: false, message: 'Debes iniciar sesión.' };
+    await addDoc(collection(db, 'waitlist'), {
+      bookId,
+      bookTitle,
+      userEmail,
+      createdAt: new Date().toISOString(),
+      notified: false
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error al añadir a lista de espera:", error);
+    return { success: false, error };
+  }
+};
+
+export const notifyWaitlistIfAvailable = async (bookId, newStock) => {
+  if (newStock > 0) {
+    try {
+      const qWaitlist = query(collection(db, 'waitlist'), where('bookId', '==', bookId), where('notified', '==', false));
+      const snap = await getDocs(qWaitlist);
+      for (const docSnap of snap.docs) {
+        await updateDoc(doc(db, 'waitlist', docSnap.id), { notified: true });
+        await addDoc(collection(db, 'notifications'), {
+          userEmail: docSnap.data().userEmail,
+          bookId,
+          bookTitle: docSnap.data().bookTitle,
+          type: 'stock_available',
+          read: false,
+          createdAt: new Date().toISOString()
+        });
+      }
+    } catch (e) {
+      console.error("Error al notificar a la lista de espera:", e);
+    }
+  }
+};
+
+export const subscribeToUserNotifications = (userEmail, callback) => {
+  if (!userEmail) return () => {};
+  const q = query(collection(db, 'notifications'), where('userEmail', '==', userEmail), where('read', '==', false));
+  return onSnapshot(q, (snapshot) => {
+    callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  });
+};
+
+export const markNotificationAsRead = async (notificationId) => {
+  try {
+    await updateDoc(doc(db, 'notifications', notificationId), { read: true });
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const requestStockNotification = async (bookId, bookTitle, userEmail) => {
+  try {
+    await addDoc(collection(db, 'notifications'), {
+      target: 'librarian',
+      type: 'stock_request',
+      bookId,
+      bookTitle,
+      userEmail: userEmail || 'Anónimo',
+      read: false,
+      createdAt: new Date().toISOString()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error al notificar al bibliotecario:", error);
+    return { success: false };
+  }
+};
+
+export const subscribeToLibrarianNotifications = (callback) => {
+  const q = query(collection(db, 'notifications'), where('target', '==', 'librarian'), where('read', '==', false));
+  return onSnapshot(q, (snapshot) => {
+    callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  });
+};
+
+
 export const subscribeToActiveReservations = (callback) => {
   const q = query(collection(db, 'reservations'), where('status', '==', 'active'));
   return onSnapshot(q, (snapshot) => callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
@@ -87,7 +168,26 @@ export const returnReservation = async (reservationId, bookId) => {
     const bookSnap = await getDoc(bookRef);
     if (bookSnap.exists()) {
       const currentStock = bookSnap.data().stock !== undefined ? bookSnap.data().stock : 0;
-      await updateDoc(bookRef, { stock: currentStock + 1, available: true });
+      const newStock = currentStock + 1;
+      await updateDoc(bookRef, { stock: newStock, available: true });
+      await notifyWaitlistIfAvailable(bookId, newStock);
+    }
+  } catch (e) { console.error(e); }
+};
+
+export const cancelReservation = async (reservationId, bookId) => {
+  try {
+    // Eliminamos la reserva para que no genere XP ni historial
+    await deleteDoc(doc(db, 'reservations', reservationId));
+    
+    // Restaurar stock
+    const bookRef = doc(db, 'books', bookId);
+    const bookSnap = await getDoc(bookRef);
+    if (bookSnap.exists()) {
+      const currentStock = bookSnap.data().stock !== undefined ? bookSnap.data().stock : 0;
+      const newStock = currentStock + 1;
+      await updateDoc(bookRef, { stock: newStock, available: true });
+      await notifyWaitlistIfAvailable(bookId, newStock);
     }
   } catch (e) { console.error(e); }
 };
@@ -163,6 +263,7 @@ export const updateBookStock = async (bookId, newStock) => {
       stock: newStock, 
       available: newStock > 0 
     });
+    await notifyWaitlistIfAvailable(bookId, newStock);
     return { success: true };
   } catch (error) {
     console.error("Error al actualizar el stock:", error);

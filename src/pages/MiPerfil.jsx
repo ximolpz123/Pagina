@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { subscribeToUserActiveReservations, subscribeToUserHistoryReservations, returnReservation, addReview } from '../bookService.js';
+import { subscribeToUserActiveReservations, subscribeToUserHistoryReservations, returnReservation, cancelReservation, addReview } from '../bookService.js';
 import { QRCodeSVG } from 'qrcode.react';
 import { useSwipeable } from 'react-swipeable';
 import { Settings, LogOut, RefreshCcw, Edit2, Star } from 'lucide-react';
@@ -39,7 +39,7 @@ const SwipeableReservation = ({ res, onReturn, onExpandQR, isPending }) => {
     <div className="swipe-wrapper" {...handlers}>
       <div className={`swipe-content ${swiped ? 'swiped' : ''} glass-panel`}>
         <div className="desktop-return-box">
-          <button onClick={() => onReturn(res.id, res.bookId, res.bookTitle)} className="desktop-return-btn" title={isPending ? "Cancelar reserva" : "Devolver libro"}>
+          <button onClick={() => onReturn(res.id, res.bookId, res.bookTitle, isPending)} className="desktop-return-btn" title={isPending ? "Cancelar reserva" : "Devolver libro"}>
             <RefreshCcw size={20} />
           </button>
         </div>
@@ -57,7 +57,7 @@ const SwipeableReservation = ({ res, onReturn, onExpandQR, isPending }) => {
       </div>
       
       <div className="swipe-action">
-        <button onClick={() => onReturn(res.id, res.bookId, res.bookTitle)} className="btn-swipe-return">
+        <button onClick={() => onReturn(res.id, res.bookId, res.bookTitle, isPending)} className="btn-swipe-return">
           <RefreshCcw size={20} />
           {isPending ? "Cancelar" : "Devolver"}
         </button>
@@ -138,7 +138,13 @@ const MiPerfil = () => {
     };
   }, [currentUser]);
 
-  const handleReturn = async (reservationId, bookId, bookTitle) => {
+  const handleReturn = async (reservationId, bookId, bookTitle, isPending = false) => {
+    if (isPending) {
+      await cancelReservation(reservationId, bookId);
+      toast.success('Reserva cancelada', { icon: '🚫' });
+      return; // No mostramos modal de reseña
+    }
+
     await returnReservation(reservationId, bookId);
     toast.success('Libro devuelto correctamente', { icon: '📚' });
     setReviewBook({ id: bookId, title: bookTitle });
