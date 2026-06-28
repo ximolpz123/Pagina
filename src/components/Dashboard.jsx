@@ -474,11 +474,13 @@ const Dashboard = () => {
               </div>
 
               <div className="about-card">
-                <h3>⭐ Comunidad y Perfil</h3>
+                <h3>⭐ Comunidad, Perfil y Accesibilidad</h3>
                 <ul>
                   <li><strong>Personaliza:</strong> En Configuración (Mi Perfil) puedes agregar tu foto y carrera.</li>
                   <li><strong>Opina:</strong> Al devolver un libro, podrás calificarlo y dejar una reseña para otros lectores.</li>
                   <li><strong>Favoritos:</strong> Dale al corazón (❤️) para guardar libros en tu carrusel personal.</li>
+                  <li><strong>Notificaciones (🔔):</strong> Si un libro está agotado, puedes solicitar que te avisen. Revisa la campanita en el menú para ver si ya hay stock.</li>
+                  <li><strong>Accesibilidad (🌓):</strong> Usa el botón de tema (Luna/Sol/Ojo) para activar el Modo Oscuro o el Alto Contraste. También puedes cambiar a vista de lista en Búsqueda.</li>
                 </ul>
               </div>
 
@@ -489,6 +491,7 @@ const Dashboard = () => {
                   <li>Tiempo de préstamo estándar de <strong>1 semana (7 días)</strong>.</li>
                   <li>⚠️ <strong>Penalización Académica:</strong> Se descontarán <strong>5 décimas</strong> en tu próxima nota por cada libro atrasado.</li>
                   <li>🚫 <strong>Bloqueo Temporal:</strong> Si entregas un libro atrasado, no podrás volver a reservar libros de <strong>ese mismo género</strong> (ej. Ficción) durante 1 semana.</li>
+                  <li>🚫 <strong>Cancelaciones Justas:</strong> Si te arrepientes y cancelas una reserva antes de retirarla, esta se borra y no suma XP ni historial.</li>
                 </ul>
               </div>
             </div>

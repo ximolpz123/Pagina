@@ -1,5 +1,5 @@
 import React from 'react';
-import { Camera, Search, Sparkles, Save, QrCode, FileSpreadsheet, Smartphone, ShieldCheck } from 'lucide-react';
+import { Camera, Search, Sparkles, Save, QrCode, FileSpreadsheet, Smartphone, ShieldCheck, BellRing, Eye } from 'lucide-react';
 import './GuiaBibliotecario.css';
 
 const GuiaBibliotecario = () => {
@@ -135,6 +135,38 @@ const GuiaBibliotecario = () => {
             <p>
               Esta plataforma es una <strong>PWA Nativa</strong>. Eso significa que no solo es una página web, ¡es una aplicación real! Dile a tus estudiantes que la abran en Google Chrome en sus celulares y presionen <strong>"Añadir a la pantalla de inicio" / "Instalar App"</strong>. La Biblioteca quedará instalada como una app normal, con su propio ícono y sin necesidad de abrir el navegador web.
             </p>
+          </div>
+        </div>
+
+        <div className="guide-card">
+          <div className="guide-icon-container" style={{ background: 'linear-gradient(135deg, #ef4444, #b91c1c)' }}>
+            <BellRing className="guide-icon" />
+          </div>
+          <div className="guide-content">
+            <h3>Notificaciones de Stock (Lista de Espera)</h3>
+            <p>
+              Ahora los estudiantes pueden hacer clic en "Avisarme cuando esté disponible" si un libro está agotado.
+            </p>
+            <ul className="guide-list">
+              <li>Verás estas solicitudes en el nuevo <strong>Centro de Alertas (Campanita)</strong> en tu menú principal.</li>
+              <li>Cuando añadas stock (ya sea manualmente editando el libro o cuando alguien lo devuelva), el sistema les enviará mágicamente una notificación a todos los estudiantes en lista de espera avisando que ya pueden reservarlo.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="guide-card">
+          <div className="guide-icon-container" style={{ background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)' }}>
+            <Eye className="guide-icon" />
+          </div>
+          <div className="guide-content">
+            <h3>Nuevos Modos de Accesibilidad</h3>
+            <p>
+              El sistema ahora cuenta con funciones especiales para personas con visión reducida o necesidades diferentes.
+            </p>
+            <ul className="guide-list">
+              <li><strong>Modo Alto Contraste:</strong> En el menú inferior, el botón de Modo Oscuro ahora también tiene una opción de "Alto Contraste" con colores amarillo/negro diseñados médicamente para maximizar la legibilidad.</li>
+              <li><strong>Vista de Lista:</strong> En la sección Buscar, hay dos iconos nuevos en la parte superior derecha para alternar entre "Cuadrícula" (normal) y "Lista" (para leer más fácil en pantallas pequeñas).</li>
+            </ul>
           </div>
         </div>
 

@@ -4,7 +4,8 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  updateProfile
 } from 'firebase/auth';
 
 const AuthContext = createContext();
@@ -32,8 +33,23 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      setCurrentUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user && !user.displayName) {
+        // Detectar nombre a partir del correo (ej: tomas.hujo@... -> Tomas Hujo)
+        const namePart = user.email.split('@')[0];
+        const formattedName = namePart.split('.').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        
+        try {
+          await updateProfile(user, { displayName: formattedName });
+          // Actualizamos el usuario en el estado con el nuevo nombre
+          setCurrentUser({ ...user, displayName: formattedName });
+        } catch (e) {
+          console.error("Error auto-generando nombre:", e);
+          setCurrentUser(user);
+        }
+      } else {
+        setCurrentUser(user);
+      }
       setLoading(false);
     });
     return unsubscribe;
