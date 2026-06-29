@@ -242,7 +242,7 @@ const Bibliotecario = () => {
                 type="button" 
                 className="scan-btn" 
                 onClick={() => setShowScanner(!showScanner)}
-                style={{ padding: '0.8rem 1.2rem', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1rem', transition: 'background-color 0.2s' }}
+                style={{ padding: '0.8rem 1.2rem', backgroundColor: 'var(--primary-color)', color: 'var(--btn-text)', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '1rem', transition: 'background-color 0.2s' }}
               >
                 📷 {showScanner ? 'Cerrar Cámara' : 'Escanear ISBN'}
               </button>

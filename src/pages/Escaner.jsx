@@ -46,7 +46,7 @@ const Escaner = () => {
       {!showScanner && !successModal.show ? (
         <button 
           onClick={() => { setShowScanner(true); setNotification({ show: false, message: '', type: '' }); }}
-          style={{ padding: '1rem 2rem', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold' }}
+          style={{ padding: '1rem 2rem', backgroundColor: 'var(--primary-color)', color: 'var(--btn-text)', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold' }}
         >
           Escanear Nuevo Código
         </button>

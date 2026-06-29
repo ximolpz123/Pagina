@@ -284,10 +284,10 @@ const Dashboard = () => {
         )}
         {isLibrarian && (
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="about-btn" style={{ backgroundColor: 'var(--primary-color)', color: 'white' }} onClick={() => navigate('/guia')}>
+            <button className="about-btn" style={{ backgroundColor: 'var(--primary-color)', color: 'var(--btn-text)' }} onClick={() => navigate('/guia')}>
               📖 Guía
             </button>
-            <button className="about-btn" style={{ backgroundColor: '#ef4444', color: 'white' }} onClick={async () => {
+            <button className="about-btn" style={{ backgroundColor: 'var(--danger-color)', color: 'var(--btn-text)' }} onClick={async () => {
               await logout();
               navigate('/login');
             }}>

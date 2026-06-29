@@ -51,7 +51,7 @@
 .pay-fine-btn {
   margin-top: 0.8rem;
   background: var(--danger-color);
-  color: white;
+  color: var(--btn-text);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 8px;
@@ -154,7 +154,7 @@
 
 .btn-save-profile {
   background: var(--primary-color);
-  color: white;
+  color: var(--btn-text);
   border: none;
   padding: 0.8rem 1.5rem;
   border-radius: 8px;
@@ -185,7 +185,7 @@
 
 .desktop-return-btn:hover {
   background: var(--danger-color);
-  color: white;
+  color: var(--btn-text);
   transform: scale(1.1);
 }
 
@@ -230,7 +230,7 @@
 
 .btn-swipe-return {
   background: transparent;
-  color: white;
+  color: var(--btn-text);
   border: none;
   font-weight: 800;
   display: flex;
@@ -289,7 +289,7 @@
 .config-user-box .email { font-size: 1rem; color: var(--text-main); word-break: break-all; }
 
 .config-actions { display: flex; flex-direction: column; gap: 0.8rem; }
-.logout-btn { background: var(--danger-color); color: white; padding: 0.8rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
+.logout-btn { background: var(--danger-color); color: var(--btn-text); padding: 0.8rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
 .close-config-btn { background: var(--secondary-color); color: var(--text-main); padding: 0.8rem; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; }
 
 .review-textarea {

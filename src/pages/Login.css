@@ -41,7 +41,7 @@
 
 .login-btn {
   background-color: var(--primary-color);
-  color: white;
+  color: var(--btn-text);
   border: none;
   padding: 1rem;
   border-radius: 8px;

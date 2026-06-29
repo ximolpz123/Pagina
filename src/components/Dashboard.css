@@ -20,7 +20,7 @@
 
 .about-btn {
   background: var(--primary-color);
-  color: white;
+  color: var(--btn-text);
   border: none;
   padding: 0.8rem 1.5rem;
   border-radius: 999px;
@@ -265,7 +265,7 @@
 
 .btn-entendido {
   background: var(--primary-color);
-  color: white;
+  color: var(--btn-text);
   border: none;
   padding: 1rem 3rem;
   border-radius: 999px;

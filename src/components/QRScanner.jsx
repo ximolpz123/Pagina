@@ -33,7 +33,7 @@ const QRScanner = ({ onScan, onClose }) => {
         
         <div id="qr-reader" ref={scannerRef} style={{ width: '100%', borderRadius: '8px', overflow: 'hidden', background: 'white' }}></div>
         
-        <button onClick={onClose} style={{ marginTop: '1.5rem', width: '100%', padding: '0.8rem', backgroundColor: 'var(--danger-color)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+        <button onClick={onClose} style={{ marginTop: '1.5rem', width: '100%', padding: '0.8rem', backgroundColor: 'var(--danger-color)', color: 'var(--btn-text)', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
           Cancelar
         </button>
       </div>

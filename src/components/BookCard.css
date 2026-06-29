@@ -170,7 +170,7 @@
 .reserve-btn {
   flex: 2;
   background-color: var(--primary-color);
-  color: white;
+  color: var(--btn-text);
   border: none;
   padding: 0.8rem;
   border-radius: 8px;
@@ -183,7 +183,7 @@
 .reserve-btn-express {
   flex: 1;
   background-color: #f59e0b;
-  color: white;
+  color: var(--btn-text);
   border: none;
   padding: 0.8rem 0;
   border-radius: 8px;
@@ -207,7 +207,7 @@
 .request-stock-btn {
   margin-top: auto;
   background-color: var(--tertiary-color);
-  color: white;
+  color: var(--btn-text);
   border: none;
   padding: 0.8rem;
   border-radius: 8px;
@@ -237,7 +237,7 @@
 
 .details-btn:hover {
   background-color: var(--primary-color);
-  color: white;
+  color: var(--btn-text);
   transform: translateY(-2px);
 }
 
@@ -314,7 +314,7 @@
 
 .modal-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
 .cancel-btn { flex: 1; padding: 0.6rem; background: var(--secondary-color); color: var(--text-main); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-.confirm-btn { flex: 1; padding: 0.6rem; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
+.confirm-btn { flex: 1; padding: 0.6rem; background: var(--primary-color); color: var(--btn-text); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background-color 0.2s; }
 .confirm-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
 
 /* Warning Modal */

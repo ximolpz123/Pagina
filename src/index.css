@@ -13,6 +13,7 @@
   --card-bg: white;
   --input-bg: #f8fafc;
   --border-color: #e2e8f0;
+  --btn-text: #FFFFFF;
 }
 
 [data-theme='dark'] {
@@ -29,6 +30,7 @@
   --card-bg: #1e293b;
   --input-bg: #0f172a;
   --border-color: #334155;
+  --btn-text: #FFFFFF;
 }
 
 [data-theme='high-contrast'] {
@@ -45,6 +47,7 @@
   --card-bg: #000000;
   --input-bg: #000000;
   --border-color: #FFFFFF;
+  --btn-text: #000000; /* Black text on bright yellow/green/red backgrounds */
 }
 
 

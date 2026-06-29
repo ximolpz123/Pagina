@@ -72,10 +72,10 @@
   padding: 1rem; border-radius: 12px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.2s;
 }
 
-.reserve-btn-express { background: #f59e0b; color: white; }
+.reserve-btn-express { background: #f59e0b; color: var(--btn-text); }
 .reserve-btn-express:hover { background: #d97706; transform: translateY(-2px); }
 
-.reserve-btn-large { background: var(--primary-color); color: white; }
+.reserve-btn-large { background: var(--primary-color); color: var(--btn-text); }
 .reserve-btn-large:hover { background: var(--primary-hover); transform: translateY(-2px); }
 
 .admin-section {
@@ -110,7 +110,7 @@
 
 .request-stock-btn-large:hover:not(:disabled) {
   background-color: var(--tertiary-color);
-  color: white;
+  color: var(--btn-text);
   transform: translateY(-2px);
 }
 

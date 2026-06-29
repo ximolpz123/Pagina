@@ -115,7 +115,7 @@ const Navbar = () => {
         <div style={{ position: 'relative' }}>
           <Bell className="nav-icon" />
           {totalAlerts > 0 && (
-            <span style={{ position: 'absolute', top: '-5px', right: '-5px', backgroundColor: '#ef4444', color: 'white', fontSize: '0.6rem', fontWeight: 'bold', width: '16px', height: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ position: 'absolute', top: '-5px', right: '-5px', backgroundColor: 'var(--danger-color)', color: 'var(--btn-text)', fontSize: '0.6rem', fontWeight: 'bold', width: '16px', height: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {totalAlerts}
             </span>
           )}
