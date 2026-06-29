@@ -352,7 +352,7 @@ const Dashboard = () => {
               <div className="chart-card glass-panel">
                 <h3>Distribución por Categorías</h3>
                 <div className="chart-wrapper">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <PieChart>
                       <Pie data={categoriesDistribution} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
                         {categoriesDistribution.map((entry, index) => <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />)}
@@ -367,7 +367,7 @@ const Dashboard = () => {
               <div className="chart-card glass-panel">
                 <h3>Disponibilidad (General)</h3>
                 <div className="chart-wrapper">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <BarChart data={statusDistribution}>
                       <XAxis dataKey="name" stroke="var(--text-main)" />
                       <YAxis stroke="var(--text-main)" />
