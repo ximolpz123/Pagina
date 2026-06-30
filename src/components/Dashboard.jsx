@@ -481,6 +481,7 @@ const Dashboard = () => {
                   <li><strong>Favoritos:</strong> Dale al corazón (❤️) para guardar libros en tu carrusel personal.</li>
                   <li><strong>Notificaciones (🔔):</strong> Si un libro está agotado, puedes solicitar que te avisen. Revisa la campanita en el menú para ver si ya hay stock.</li>
                   <li><strong>Accesibilidad (🌓):</strong> Usa el botón de tema (Luna/Sol/Ojo) para activar el Modo Oscuro o el Alto Contraste. También puedes cambiar a vista de lista en Búsqueda.</li>
+                  <li><strong>🔒 Seguridad Institucional:</strong> Tu cuenta está estrictamente vinculada a tu correo institucional, y por tu privacidad, la sesión se cierra automáticamente si dejas la página en computadores públicos.</li>
                 </ul>
               </div>
 
