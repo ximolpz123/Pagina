@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { subscribeToUserActiveReservations, subscribeToUserHistoryReservations, returnReservation, cancelReservation, addReview } from '../bookService.js';
+import { subscribeToUserActiveReservations, subscribeToUserHistoryReservations, returnReservation, cancelReservation, addReview, sendJustificationEmail } from '../bookService.js';
 import { QRCodeSVG } from 'qrcode.react';
 import { useSwipeable } from 'react-swipeable';
 import { Settings, LogOut, RefreshCcw, Edit2, Star } from 'lucide-react';
@@ -91,6 +91,11 @@ const MiPerfil = () => {
   
   // QR Expandido
   const [expandedQRRes, setExpandedQRRes] = useState(null);
+
+  // Justificación de Atraso
+  const [showJustificationForm, setShowJustificationForm] = useState(false);
+  const [justificationText, setJustificationText] = useState('');
+  const [isSubmittingJustification, setIsSubmittingJustification] = useState(false);
 
   useEffect(() => {
     // Para evitar advertencias de set-state-in-effect si es síncrono, lo manejamos limpiamente
@@ -214,8 +219,36 @@ const MiPerfil = () => {
     }
   }, [activeReservations, expandedQRRes]);
 
+  const handleJustificationSubmit = async () => {
+    if (justificationText.trim().length < 10) {
+      return toast.error("La justificación debe tener al menos 10 caracteres.");
+    }
+    setIsSubmittingJustification(true);
+    const toastId = toast.loading('Enviando justificación...');
+    try {
+      const res = await sendJustificationEmail(currentUser.email, justificationText);
+      if (res.success) {
+        toast.success("Tu justificación ha sido enviada al bibliotecario por correo.", { id: toastId, duration: 4000 });
+        setJustificationText('');
+        setShowJustificationForm(false);
+        setFinesPaid(true); // Ocultar localmente
+      } else {
+        toast.error("Hubo un problema al enviar.", { id: toastId });
+      }
+    } catch (e) {
+      toast.error("Error al enviar.", { id: toastId });
+    }
+    setIsSubmittingJustification(false);
+  };
+
   // --- LOGICA DE GAMIFICACIÓN ---
-  const xp = historyReservations.length * 50;
+  const validXPReservations = historyReservations.filter(res => {
+    if (!res.returnedAt || !res.returnDate) return true;
+    const expected = new Date(res.returnDate + "T23:59:59");
+    const actual = new Date(res.returnedAt);
+    return actual <= expected;
+  });
+  const xp = validXPReservations.length * 50;
   let rankName = 'Lector Principiante';
   let xpProgress = xp;
   let xpMax = 250; // Requiere 5 libros para subir a Explorador
@@ -306,10 +339,40 @@ const MiPerfil = () => {
               </div>
             )}
             <p className="stat-value" style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{multasPendientes} décimas</p>
-            {multasPendientes > 0 && (
-              <button onClick={() => setFinesPaid(true)} className="pay-fine-btn">
+            {multasPendientes > 0 && !finesPaid && !showJustificationForm && (
+              <button onClick={() => setShowJustificationForm(true)} className="pay-fine-btn">
                 Justificar Atraso
               </button>
+            )}
+            
+            {showJustificationForm && !finesPaid && (
+              <div style={{ marginTop: '1rem', width: '100%', textAlign: 'left' }}>
+                <textarea 
+                  value={justificationText}
+                  onChange={(e) => setJustificationText(e.target.value)}
+                  placeholder="Escribe el motivo de tu atraso (ej. licencia médica, paro de transporte, etc)..."
+                  style={{ width: '100%', minHeight: '80px', padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-color)', color: 'var(--text-main)', fontSize: '0.9rem', marginBottom: '0.5rem' }}
+                />
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button 
+                    onClick={handleJustificationSubmit} 
+                    disabled={isSubmittingJustification}
+                    style={{ flex: 1, padding: '0.5rem', backgroundColor: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: isSubmittingJustification ? 'not-allowed' : 'pointer' }}
+                  >
+                    {isSubmittingJustification ? 'Enviando...' : 'Enviar Justificación'}
+                  </button>
+                  <button 
+                    onClick={() => setShowJustificationForm(false)} 
+                    style={{ padding: '0.5rem', backgroundColor: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border-color)', borderRadius: '8px', cursor: 'pointer' }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {finesPaid && (
+              <p style={{ marginTop: '1rem', color: '#10b981', fontSize: '0.9rem', fontWeight: 'bold' }}>✅ Justificación en revisión</p>
             )}
           </div>
         </section>

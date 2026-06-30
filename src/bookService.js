@@ -16,6 +16,21 @@ export const getBooks = async () => {
   }
 };
 
+export const sendJustificationEmail = async (userEmail, message) => {
+  try {
+    await addDoc(collection(db, 'justifications'), {
+      userEmail,
+      message,
+      createdAt: new Date().toISOString(),
+      status: 'simulated_email_sent'
+    });
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error };
+  }
+};
+
 export const addReservation = async (book, pickupDate, returnDate, userEmail) => {
   try {
     await addDoc(collection(db, 'reservations'), {
