@@ -26,6 +26,12 @@ Una plataforma web progresiva (PWA) diseñada para modernizar y gamificar la exp
 - **Reportes Gerenciales:** Botón de descarga para generar hojas de cálculo de Excel (`.xlsx`) limpias y ordenadas de todo el inventario con un clic.
 - **Trazabilidad Absoluta:** Historial en tiempo real de quién registró un libro, quién lo retiró, y todos los movimientos críticos del sistema.
 
+### 🛡️ Seguridad y Accesibilidad Institucional
+- **Accesibilidad Universal (WCAG):** Modo de Alto Contraste inteligente integrado nativamente en el código para usuarios con dificultades visuales.
+- **Filtro de Dominio Estricto:** El registro está bloqueado a nivel de sistema para aceptar únicamente correos institucionales oficiales (`@alumnos.santotomas.cl`).
+- **Autenticación Inteligente:** Detección y asignación automática del nombre real del estudiante a partir del formato de su correo.
+- **Privacidad Volátil:** Persistencia de sesión en memoria (la cuenta se cierra automáticamente por seguridad si el alumno olvida cerrar su navegador público).
+
 ---
 
 ## 🛠️ Tecnologías y Stack Utilizado

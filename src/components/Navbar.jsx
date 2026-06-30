@@ -162,7 +162,7 @@ const Navbar = () => {
                   <button onClick={(e) => handleMarkAsRead(e, notif.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1 }}>&times;</button>
                 </div>
                 <p style={{ margin: '3px 0 0 0', color: 'var(--text-main)' }}>
-                  El usuario <strong>{notif.userEmail}</strong> solicita que repongas stock del libro: <strong>{notif.bookTitle}</strong>.
+                  Un usuario solicita que repongas stock del libro: <strong>{notif.bookTitle}</strong>.
                 </p>
               </div>
             ))}

@@ -48,6 +48,12 @@ export const addReservation = async (book, pickupDate, returnDate, userEmail) =>
 export const addToWaitlist = async (bookId, userEmail, bookTitle) => {
   try {
     if (!userEmail) return { success: false, message: 'Debes iniciar sesión.' };
+    const qWaitlist = query(collection(db, 'waitlist'), where('bookId', '==', bookId), where('userEmail', '==', userEmail), where('notified', '==', false));
+    const snap = await getDocs(qWaitlist);
+    if (!snap.empty) {
+      return { success: true }; 
+    }
+
     await addDoc(collection(db, 'waitlist'), {
       bookId,
       bookTitle,
@@ -59,6 +65,18 @@ export const addToWaitlist = async (bookId, userEmail, bookTitle) => {
   } catch (error) {
     console.error("Error al añadir a lista de espera:", error);
     return { success: false, error };
+  }
+};
+
+export const checkIfWaitlistRequested = async (bookId, userEmail) => {
+  if (!userEmail) return false;
+  try {
+    const qWaitlist = query(collection(db, 'waitlist'), where('bookId', '==', bookId), where('userEmail', '==', userEmail), where('notified', '==', false));
+    const snap = await getDocs(qWaitlist);
+    return !snap.empty;
+  } catch (error) {
+    console.error(error);
+    return false;
   }
 };
 
@@ -88,7 +106,8 @@ export const subscribeToUserNotifications = (userEmail, callback) => {
   if (!userEmail) return () => {};
   const q = query(collection(db, 'notifications'), where('userEmail', '==', userEmail), where('read', '==', false));
   return onSnapshot(q, (snapshot) => {
-    callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    callback(notifs.filter(n => n.target !== 'librarian'));
   });
 };
 
@@ -115,6 +134,18 @@ export const requestStockNotification = async (bookId, bookTitle, userEmail) => 
   } catch (error) {
     console.error("Error al notificar al bibliotecario:", error);
     return { success: false };
+  }
+};
+
+export const checkIfStockRequested = async (bookId, userEmail) => {
+  if (!userEmail) return false;
+  try {
+    const qStock = query(collection(db, 'notifications'), where('target', '==', 'librarian'), where('type', '==', 'stock_request'), where('bookId', '==', bookId), where('userEmail', '==', userEmail), where('read', '==', false));
+    const snap = await getDocs(qStock);
+    return !snap.empty;
+  } catch (error) {
+    console.error(error);
+    return false;
   }
 };
 

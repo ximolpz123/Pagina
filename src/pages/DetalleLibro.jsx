@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { subscribeToBookById, addReservation, updateBookStock, subscribeToUserActiveReservations, getBookReviews, checkBannedCategory, deleteBook, addToWaitlist, requestStockNotification } from '../bookService.js';
+import { subscribeToBookById, addReservation, updateBookStock, subscribeToUserActiveReservations, getBookReviews, checkBannedCategory, deleteBook, addToWaitlist, requestStockNotification, checkIfWaitlistRequested, checkIfStockRequested } from '../bookService.js';
 import toast from 'react-hot-toast';
 import { Heart, Star } from 'lucide-react';
 import './DetalleLibro.css';
@@ -47,6 +47,11 @@ const DetalleLibro = () => {
     const unsubscribeReservations = subscribeToUserActiveReservations(currentUser?.email, setReservasActivas);
     
     getBookReviews(id).then(data => setReviews(data));
+    
+    if (currentUser?.email) {
+      checkIfWaitlistRequested(id, currentUser.email).then(requested => setWaitlistRequested(requested));
+      checkIfStockRequested(id, currentUser.email).then(requested => setStockRequested(requested));
+    }
 
     return () => {
       if (typeof unsubscribeBook === 'function') unsubscribeBook();
@@ -188,6 +193,18 @@ const DetalleLibro = () => {
 
   return (
     <main>
+      {isReserving && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)', zIndex: 9999,
+          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'white'
+        }}>
+          <div style={{ width: '60px', height: '60px', border: '6px solid rgba(255,255,255,0.2)', borderTop: '6px solid var(--primary-color)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          <h2 style={{ marginTop: '25px', fontSize: '1.8rem', fontWeight: 'bold' }}>Procesando tu reserva...</h2>
+          <p style={{ marginTop: '10px', color: 'rgba(255,255,255,0.7)' }}>Validando stock y preparando tu retiro.</p>
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
       <div className="detalle-container">
         <button onClick={() => navigate(-1)} className="back-btn">← Volver</button>
         <div className="detalle-content glass-panel">
