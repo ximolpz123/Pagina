@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { subscribeToUserActiveReservations, subscribeToUserHistoryReservations, returnReservation, cancelReservation, addReview, sendJustificationEmail } from '../bookService.js';
+import { subscribeToUserActiveReservations, subscribeToUserHistoryReservations, returnReservation, cancelReservation, addReview, sendJustificationEmail, subscribeToUserJustification } from '../bookService.js';
 import { QRCodeSVG } from 'qrcode.react';
 import { useSwipeable } from 'react-swipeable';
 import { Settings, LogOut, RefreshCcw, Edit2, Star } from 'lucide-react';
@@ -12,7 +12,7 @@ import { formatDistanceToNowStrict, isPast, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import './MiPerfil.css';
 
-const SwipeableReservation = ({ res, onReturn, onExpandQR, isPending }) => {
+const SwipeableReservation = ({ res, onReturn, onExpandQR, isPending, hasPendingJustification }) => {
   const [swiped, setSwiped] = useState(false);
 
   const handlers = useSwipeable({
@@ -23,10 +23,8 @@ const SwipeableReservation = ({ res, onReturn, onExpandQR, isPending }) => {
   });
 
   const getRelativeDate = (dateStr) => {
-    if (!dateStr) return <strong>Desconocida</strong>;
     try {
-      const parts = dateStr.split('-');
-      const date = new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59);
+      const date = new Date(dateStr + "T00:00:00");
       if (isToday(date)) return <strong style={{ color: '#f59e0b' }}>Hoy</strong>;
       if (isPast(date)) return <strong style={{ color: '#ef4444' }}>Hace {formatDistanceToNowStrict(date, { locale: es })} (Atrasado)</strong>;
       return <strong style={{ color: '#10b981' }}>En {formatDistanceToNowStrict(date, { locale: es })}</strong>;
@@ -35,11 +33,34 @@ const SwipeableReservation = ({ res, onReturn, onExpandQR, isPending }) => {
     }
   };
 
+  const isLate = () => {
+    if (!res.returnDate) return false;
+    return isPast(new Date(res.returnDate + "T23:59:59"));
+  };
+
+  const canReturn = () => {
+    if (isPending) return true;
+    if (isLate() && !hasPendingJustification) return false;
+    return true;
+  };
+
+  const handleReturnClick = () => {
+    if (!canReturn()) {
+      return toast.error("No puedes devolver un libro atrasado sin antes justificar el atraso.");
+    }
+    onReturn(res.id, res.bookId, res.bookTitle, isPending);
+  };
+
   return (
     <div className="swipe-wrapper" {...handlers}>
       <div className={`swipe-content ${swiped ? 'swiped' : ''} glass-panel`}>
         <div className="desktop-return-box">
-          <button onClick={() => onReturn(res.id, res.bookId, res.bookTitle, isPending)} className="desktop-return-btn" title={isPending ? "Cancelar reserva" : "Devolver libro"}>
+          <button 
+            onClick={handleReturnClick} 
+            className="desktop-return-btn" 
+            title={isPending ? "Cancelar reserva" : (!canReturn() ? "Justifica el atraso primero" : "Devolver libro")}
+            style={{ opacity: !canReturn() ? 0.5 : 1, cursor: !canReturn() ? 'not-allowed' : 'pointer' }}
+          >
             <RefreshCcw size={20} />
           </button>
         </div>
@@ -57,7 +78,11 @@ const SwipeableReservation = ({ res, onReturn, onExpandQR, isPending }) => {
       </div>
       
       <div className="swipe-action">
-        <button onClick={() => onReturn(res.id, res.bookId, res.bookTitle, isPending)} className="btn-swipe-return">
+        <button 
+          onClick={handleReturnClick} 
+          className="btn-swipe-return"
+          style={{ opacity: !canReturn() ? 0.5 : 1, cursor: !canReturn() ? 'not-allowed' : 'pointer' }}
+        >
           <RefreshCcw size={20} />
           {isPending ? "Cancelar" : "Devolver"}
         </button>
@@ -73,6 +98,7 @@ const MiPerfil = () => {
   const [error, setError] = useState('');
   const [activeReservations, setActiveReservations] = useState([]);
   const [historyReservations, setHistoryReservations] = useState([]);
+  const [hasPendingJustification, setHasPendingJustification] = useState(false);
   const [finesPaid, setFinesPaid] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [showFinesTooltip, setShowFinesTooltip] = useState(false);
@@ -82,23 +108,19 @@ const MiPerfil = () => {
   const [userCareer, setUserCareer] = useState('Estudiante');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   
-  // Reseñas
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [reviewBook, setReviewBook] = useState(null);
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   
-  // QR Expandido
   const [expandedQRRes, setExpandedQRRes] = useState(null);
 
-  // Justificación de Atraso
   const [showJustificationForm, setShowJustificationForm] = useState(false);
   const [justificationText, setJustificationText] = useState('');
   const [isSubmittingJustification, setIsSubmittingJustification] = useState(false);
 
   useEffect(() => {
-    // Para evitar advertencias de set-state-in-effect si es síncrono, lo manejamos limpiamente
     if (currentUser) {
       setTimeout(() => {
         setEditName(currentUser.displayName || '');
@@ -126,20 +148,57 @@ const MiPerfil = () => {
     let totalMulta = 0;
     const todayStr = getFormattedDate(new Date());
     activeReservations.forEach(res => {
-      if (res.returnDate && todayStr > res.returnDate) totalMulta += 5; // 5 décimas por libro
+      if (res.returnDate && todayStr > res.returnDate) totalMulta += 5;
     });
     return totalMulta;
   };
 
   const multasPendientes = calcularMulta();
 
+  const getBannedCategories = () => {
+    const bans = {};
+    const todayStr = getFormattedDate(new Date());
+    const todayDate = new Date();
+
+    // 1. Activas atrasadas
+    activeReservations.forEach(res => {
+      if (res.returnDate && todayStr > res.returnDate && res.bookCategory) {
+        bans[res.bookCategory] = 'Hasta devolver libro';
+      }
+    });
+
+    // 2. Historial devuelto atrasado en los últimos 7 días
+    historyReservations.forEach(res => {
+      if (res.bookCategory && res.returnDate && res.returnedAt) {
+        const dueDate = new Date(res.returnDate + "T23:59:59");
+        const returnedDate = new Date(res.returnedAt);
+        if (returnedDate > dueDate) {
+          const diffTime = Math.abs(todayDate - returnedDate);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          if (diffDays <= 7) {
+            const daysLeft = 7 - diffDays + 1; // +1 to be safe
+            if (!bans[res.bookCategory] || typeof bans[res.bookCategory] === 'number') {
+               bans[res.bookCategory] = Math.max(bans[res.bookCategory] || 0, daysLeft);
+            }
+          }
+        }
+      }
+    });
+    
+    return bans;
+  };
+
+  const bannedCategories = getBannedCategories();
+
   useEffect(() => {
     if (!currentUser?.email) return;
     const unsubActive = subscribeToUserActiveReservations(currentUser.email, setActiveReservations);
     const unsubHistory = subscribeToUserHistoryReservations(currentUser.email, setHistoryReservations);
+    const unsubJustification = subscribeToUserJustification(currentUser.email, setHasPendingJustification);
     return () => {
-      if (unsubActive) unsubActive();
-      if (unsubHistory) unsubHistory();
+      unsubActive();
+      unsubHistory();
+      unsubJustification();
     };
   }, [currentUser]);
 
@@ -147,7 +206,7 @@ const MiPerfil = () => {
     if (isPending) {
       await cancelReservation(reservationId, bookId);
       toast.success('Reserva cancelada', { icon: '🚫' });
-      return; // No mostramos modal de reseña
+      return;
     }
 
     await returnReservation(reservationId, bookId);
@@ -199,7 +258,6 @@ const MiPerfil = () => {
       });
       localStorage.setItem(`career_${currentUser.email}`, editCareer);
       setUserCareer(editCareer);
-      // Forzar recarga ligera para que los componentes lean los nuevos datos del Auth
       toast.success('Perfil actualizado correctamente', { id: tId });
       setTimeout(() => window.location.reload(), 1000);
     } catch {
@@ -208,7 +266,6 @@ const MiPerfil = () => {
     }
   };
 
-  // Efecto para cerrar automáticamente el QR si el bibliotecario lo aprueba en tiempo real
   useEffect(() => {
     if (expandedQRRes) {
       const isStillPending = activeReservations.some(r => r.id === expandedQRRes.id && r.status === 'pending_pickup');
@@ -231,7 +288,7 @@ const MiPerfil = () => {
         toast.success("Tu justificación ha sido enviada al bibliotecario por correo.", { id: toastId, duration: 4000 });
         setJustificationText('');
         setShowJustificationForm(false);
-        setFinesPaid(true); // Ocultar localmente
+        setFinesPaid(true);
       } else {
         toast.error("Hubo un problema al enviar.", { id: toastId });
       }
@@ -241,7 +298,6 @@ const MiPerfil = () => {
     setIsSubmittingJustification(false);
   };
 
-  // --- LOGICA DE GAMIFICACIÓN ---
   const validXPReservations = historyReservations.filter(res => {
     if (!res.returnedAt || !res.returnDate) return true;
     const expected = new Date(res.returnDate + "T23:59:59");
@@ -251,18 +307,18 @@ const MiPerfil = () => {
   const xp = validXPReservations.length * 50;
   let rankName = 'Lector Principiante';
   let xpProgress = xp;
-  let xpMax = 250; // Requiere 5 libros para subir a Explorador
+  let xpMax = 250;
   let rankIcon = '🌱';
 
   if (xp >= 250 && xp < 750) {
     rankName = 'Explorador Literario';
     xpProgress = xp - 250;
-    xpMax = 500; // 750 - 250 (10 libros adicionales)
+    xpMax = 500;
     rankIcon = '🗺️';
   } else if (xp >= 750 && xp < 1500) {
     rankName = 'Ratón de Biblioteca';
     xpProgress = xp - 750;
-    xpMax = 750; // 1500 - 750 (15 libros adicionales)
+    xpMax = 750;
     rankIcon = '👑';
   } else if (xp >= 1500) {
     rankName = 'Erudito Máximo';
@@ -270,7 +326,7 @@ const MiPerfil = () => {
     xpMax = 1000;
     rankIcon = '🧙‍♂️';
     if (xp >= 2500) {
-        xpProgress = xpMax; // Max out
+        xpProgress = xpMax;
     }
   }
   const progressPercent = Math.min((xpProgress / xpMax) * 100, 100);
@@ -317,7 +373,6 @@ const MiPerfil = () => {
       </header>
       
       <main className="perfil-main">
-        {/* KPIs */}
         <section className="perfil-stats">
           <div className="stat-card glass-panel success">
             <h3>Créditos</h3>
@@ -339,13 +394,13 @@ const MiPerfil = () => {
               </div>
             )}
             <p className="stat-value" style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{multasPendientes} décimas</p>
-            {multasPendientes > 0 && !finesPaid && !showJustificationForm && (
+            {multasPendientes > 0 && !hasPendingJustification && !showJustificationForm && (
               <button onClick={() => setShowJustificationForm(true)} className="pay-fine-btn">
                 Justificar Atraso
               </button>
             )}
             
-            {showJustificationForm && !finesPaid && (
+            {showJustificationForm && !hasPendingJustification && (
               <div style={{ marginTop: '1rem', width: '100%', textAlign: 'left' }}>
                 <textarea 
                   value={justificationText}
@@ -371,13 +426,32 @@ const MiPerfil = () => {
               </div>
             )}
             
-            {finesPaid && (
-              <p style={{ marginTop: '1rem', color: '#10b981', fontSize: '0.9rem', fontWeight: 'bold' }}>✅ Justificación en revisión</p>
+            {hasPendingJustification && (
+              <div style={{ marginTop: '1rem', padding: '0.8rem', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', borderRadius: '8px' }}>
+                <p style={{ color: '#10b981', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}>✅ Justificación en revisión</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Tienes {multasPendientes} décimas pendientes de revisión.</p>
+              </div>
             )}
           </div>
         </section>
 
-        {/* Pendientes de Retiro */}
+        {Object.keys(bannedCategories).length > 0 && (
+          <section className="perfil-section">
+            <h3 className="section-title" style={{ color: '#ef4444' }}>🚫 Bloqueo de Categorías</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '10px' }}>Por entregar libros atrasados, no puedes reservar libros de estas categorías temporalmente:</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+              {Object.entries(bannedCategories).map(([category, status]) => (
+                <div key={category} className="glass-panel" style={{ padding: '1rem', borderLeft: '4px solid #ef4444' }}>
+                  <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-main)' }}>{category}</h4>
+                  <p style={{ margin: 0, fontSize: '0.9rem', color: '#ef4444', fontWeight: 'bold' }}>
+                    {typeof status === 'number' ? `Bloqueo por ${status} día(s) más` : status}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {pendingPickups.length > 0 && (
           <section className="perfil-section">
             <h3 className="section-title" style={{ color: '#f59e0b' }}>🕒 Pendientes de Retiro</h3>
@@ -390,13 +464,14 @@ const MiPerfil = () => {
           </section>
         )}
 
+
         {/* Reservas Activas */}
         <section className="perfil-section">
           <h3 className="section-title">📚 Libros Activos</h3>
           <div className="book-list">
             {activeLoans.length > 0 ? (
               activeLoans.map(res => (
-                <SwipeableReservation key={res.id} res={res} onReturn={handleReturn} onExpandQR={setExpandedQRRes} isPending={false} />
+                <SwipeableReservation key={res.id} res={res} onReturn={handleReturn} onExpandQR={setExpandedQRRes} isPending={false} hasPendingJustification={hasPendingJustification} />
               ))
             ) : (
               <div className="empty-state glass-panel">

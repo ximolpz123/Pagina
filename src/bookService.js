@@ -31,6 +31,14 @@ export const sendJustificationEmail = async (userEmail, message) => {
   }
 };
 
+export const subscribeToUserJustification = (userEmail, callback) => {
+  if (!userEmail) return () => {};
+  const q = query(collection(db, 'justifications'), where('userEmail', '==', userEmail), where('status', '==', 'simulated_email_sent'));
+  return onSnapshot(q, (snapshot) => {
+    callback(snapshot.docs.length > 0);
+  });
+};
+
 export const addReservation = async (book, pickupDate, returnDate, userEmail) => {
   try {
     await addDoc(collection(db, 'reservations'), {
